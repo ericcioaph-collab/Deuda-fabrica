@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deuda Fabrica · Apholos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4f0;--bg2:#fff;--bg3:#eeede9;--bg4:#e5e4e0;
+  --border:#dddcd7;--border2:#c8c7c2;
+  --text:#1a1a1a;--muted:#6b6b68;--muted2:#9b9b97;
+  --blue:#1a5a9a;--red:#b83232;--amber:#b7670a;--green:#1a7a3f;
+  --purple:#6d3ab5;--teal:#1a6a4a;
+  --mono:'DM Mono',monospace;--sans:'Inter',sans-serif;
+  --sw:240px;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;font-size:14px}
+/* topbar */
+.topbar{height:52px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.5rem;gap:1.25rem;flex-shrink:0}
+.logo-main{font-weight:700;font-size:1rem;letter-spacing:.06em;text-transform:uppercase}
+.logo-sep{width:1px;height:13px;background:var(--muted2);margin:0 .6rem;display:inline-block;vertical-align:middle}
+.logo-sub{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.page-title{font-size:.8rem;color:var(--muted)}
+.tsep{width:1px;height:18px;background:var(--border)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:.75rem}
+.upbtn{font-family:var(--mono);font-size:.65rem;padding:.3rem .7rem;border-radius:5px;border:1px solid var(--border2);color:var(--muted);cursor:pointer;background:transparent;white-space:nowrap;transition:all .15s}
+.upbtn:hover{border-color:var(--text);color:var(--text)}
+.upbtn input{display:none}
+.upstatus{font-family:var(--mono);font-size:.62rem;color:var(--green)}
+/* layout */
+.layout{display:flex;flex:1;overflow:hidden;height:calc(100vh - 52px)}
+/* sidebar */
+.sidebar{width:var(--sw);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;padding:1.1rem .9rem;display:flex;flex-direction:column;gap:1.25rem}
+.sb-title{font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:.5rem;padding-bottom:.35rem;border-bottom:1px solid var(--border)}
+.sb-opt{display:flex;align-items:center;gap:.45rem;padding:.28rem .5rem;border-radius:5px;cursor:pointer;font-size:.8rem;color:var(--muted);border:none;background:transparent;width:100%;text-align:left;transition:background .1s}
+.sb-opt:hover{background:var(--bg3);color:var(--text)}
+.sb-opt.active{background:var(--bg4);color:var(--text);font-weight:500}
+.sb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sb-count{margin-left:auto;font-family:var(--mono);font-size:.6rem;color:var(--muted2)}
+.up-area{border:1.5px dashed var(--border2);border-radius:7px;padding:.875rem;text-align:center;cursor:pointer;background:var(--bg3);transition:all .15s}
+.up-area:hover{border-color:var(--text);background:var(--bg4)}
+.up-area input{display:none}
+.up-area-txt{font-family:var(--mono);font-size:.6rem;color:var(--muted);line-height:1.5}
+.up-area-txt b{color:var(--text);display:block;margin-bottom:.1rem}
+.up-msg{margin-top:.4rem;font-family:var(--mono);font-size:.58rem;color:var(--green)}
+/* content */
+.content{flex:1;overflow-y:auto;display:flex;flex-direction:column;min-width:0}
+.tabs{display:flex;padding:0 1.25rem;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;overflow-x:auto}
+.tab{font-family:var(--mono);font-size:.65rem;letter-spacing:.05em;text-transform:uppercase;padding:.75rem 1rem;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;transition:all .15s}
+.tab:hover{color:var(--text)}.tab.active{color:var(--text);border-bottom-color:var(--text);font-weight:600}
+.ci{padding:1.25rem;flex:1}
+.page{display:none}.page.active{display:block}
+/* resumen layout */
+.res-block1{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:.75rem;margin-bottom:.75rem}
+.res-block2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-bottom:.75rem}
+.rc{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;border-top:3px solid var(--border)}
+.rc.c0{border-top-color:var(--text)}
+.rc.c1{border-top-color:var(--blue)}.rc.c2{border-top-color:var(--amber)}
+.rc.c3{border-top-color:var(--red)}.rc.c4{border-top-color:#c07a10}.rc.c5{border-top-color:var(--green)}
+.rc-lbl{font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.rc-val{font-size:1.4rem;font-weight:700;letter-spacing:-.02em;color:var(--text)}
+.rc.c0 .rc-val{font-size:1.9rem}
+.rc-sub{font-family:var(--mono);font-size:.56rem;color:var(--muted2);margin-top:.25rem;line-height:1.4}
+/* splits */
+.res-splits{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-bottom:.75rem}
+.rsb{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.875rem 1rem}
+.rsb-lbl{font-family:var(--mono);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+.rsb-inner{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.rm{border-radius:5px;padding:.55rem .7rem;border-left:3px solid}
+.rm.m0{border-left-color:var(--blue);background:#eef3ff}.rm.m1{border-left-color:var(--red);background:#fff0f0}
+.rm.m2{border-left-color:var(--amber);background:#fffbf0}.rm.m3{border-left-color:var(--green);background:#f0fff4}
+.rm.m4{border-left-color:var(--purple);background:#faf0ff}.rm.m5{border-left-color:var(--teal);background:#f0fffa}
+.rm-lbl{font-family:var(--mono);font-size:.54rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem}
+.rm-val{font-size:1rem;font-weight:700;color:var(--text)}
+.rm-sub{font-family:var(--mono);font-size:.52rem;color:var(--muted2);margin-top:.1rem}
+/* panels */
+.res-panels{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.ph{padding:.7rem 1rem;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pb{padding:.75rem 1rem}
+.ri{display:flex;align-items:center;gap:.5rem;padding:.42rem 0;border-bottom:1px solid var(--border)}
+.ri:last-child{border-bottom:none}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.rn{flex:1;font-size:.78rem}.rc2{font-family:var(--mono);font-size:.6rem;color:var(--muted2);width:32px;text-align:right}
+.rbw{flex:0 0 55px;height:3px;background:var(--bg4);border-radius:2px}
+.rb{height:3px;border-radius:2px}
+.ru{font-family:var(--mono);font-size:.73rem;font-weight:600;min-width:82px;text-align:right}
+.cr{display:flex;align-items:center;gap:.5rem;padding:.42rem 0;border-bottom:1px solid var(--border)}
+.cr:last-child{border-bottom:none}
+.ck{font-family:var(--mono);font-size:.6rem;color:var(--muted2);width:16px;flex-shrink:0}
+.cn{flex:1;font-size:.77rem}
+.cbw{flex:0 0 45px;height:2px;background:var(--bg4);border-radius:2px}
+.cb{height:2px;border-radius:2px;background:var(--text)}
+.cu{font-family:var(--mono);font-size:.71rem;font-weight:600;min-width:78px;text-align:right}
+/* tables */
+.ts{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.tt{padding:.7rem 1rem;border-bottom:1px solid var(--border);display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;background:var(--bg3)}
+.sb{flex:1;min-width:180px;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;padding:.36rem .75rem;color:var(--text);font-family:var(--mono);font-size:.7rem;outline:none;transition:border-color .15s}
+.sb:focus{border-color:var(--text)}.sb::placeholder{color:var(--muted2)}
+.sl{background:var(--bg2);border:1px solid var(--border2);border-radius:5px;padding:.36rem .65rem;color:var(--text);font-family:var(--mono);font-size:.67rem;outline:none;cursor:pointer}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:720px}
+thead th{font-family:var(--mono);font-size:.57rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:.58rem .85rem;text-align:left;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;user-select:none;background:var(--bg3)}
+thead th:hover{color:var(--text)}
+th.sa::after{content:' ↑';color:var(--text)}th.sd::after{content:' ↓';color:var(--text)}
+th.r,td.r{text-align:right}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}tbody tr:hover{background:var(--bg3)}
+td{padding:.52rem .85rem;font-size:.76rem;color:var(--text);white-space:nowrap}
+td.w{white-space:normal;max-width:170px;font-size:.71rem}td.m{font-family:var(--mono)}
+.bdg{font-family:var(--mono);font-size:.57rem;padding:.14rem .48rem;border-radius:3px;letter-spacing:.03em;white-space:nowrap;font-weight:500}
+.bc{background:#eef3ff;color:var(--blue)}.bp{background:#fffbf0;color:var(--amber)}
+.bb{background:#fff0f0;color:var(--red)}.ba{background:#f0fff4;color:var(--green)}
+.tm{background:#eef3ff;color:var(--blue)}.ti{background:#fff0f0;color:var(--red)}
+.tb2{background:#fffbf0;color:var(--amber)}.tas{background:#f0fff4;color:var(--green)}
+.tl{background:#faf0ff;color:var(--purple)}.te{background:#f0fffa;color:var(--teal)}
+.tcm{background:#f0fff4;color:var(--green);font-weight:600}
+.tpa{background:#fffbf0;color:var(--amber);font-weight:600}
+.tcu{background:#f0fff4;color:var(--green)}.tenv{background:#eef3ff;color:var(--blue)}
+.db{font-family:var(--mono);font-size:.68rem;font-weight:600}
+.dc{color:var(--red)}.dh{color:var(--amber)}.do{color:var(--green)}.dl{color:var(--muted)}
+.tf{padding:.52rem 1rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-family:var(--mono);font-size:.62rem;color:var(--muted);background:var(--bg3)}
+.tf b{color:var(--text)}
+/* asig kpis */
+.ak{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem}
+.ak-c{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.875rem 1rem}
+.ak-l{font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
+.ak-v{font-size:1.25rem;font-weight:700;color:var(--text)}
+.ak-s{font-family:var(--mono);font-size:.56rem;color:var(--muted2);margin-top:.15rem}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+@media(max-width:700px){.res-splits,.res-panels{grid-template-columns:1fr}.ak{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<script type="application/json" id="d-raw">[[62605, 1, "KIMUAN", "KIMUAN S.A.", "2026-02-23", "CONFIRMADO POR EXPEDICI\u00d3N", 68.26, 102, "MODA", "BEIRO", 2000, "LOCAL"], [62605, 2, "KIMUAN", "KIMUAN S.A.", "2026-02-23", "CONFIRMADO POR EXPEDICI\u00d3N", 118.33, 102, "MODA", "BEIRO", 3, "LOCAL"], [62933, 1, "ORBIS CALORAMA", "ORBIS MERTIG SAN LUIS S.A.", "2026-05-22", "CONFIRMADO POR EXPEDICI\u00d3N", 513.36, 14, "ID", "BEIRO", 488, "LOCAL"], [62982, 1, "ORBIS CALORAMA", "ORBIS MERTIG SAN LUIS S.A.", "2026-06-05", "A CONFIRMAR POR EXPEDICI\u00d3N", 360.0, 0, "ID", "BEIRO", 0, "LOCAL"], [62989, 1, "ORBIS CALORAMA", "ORBIS MERTIG SAN LUIS S.A.", "2026-06-08", "A CONFIRMAR POR EXPEDICI\u00d3N", 1440.0, -3, "ID", "BEIRO", 0, "LOCAL"], [61403, 1, "CASK MANAGEMENT", "APCE - APHOLOS MUESTRAS DE EXPORTACION", "2025-07-04", "CONFIRMADO", 0.0, 336, "ID", "BEIRO", 100, "EXPO"], [61476, 1, "BRACCO", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2025-07-25", "CONFIRMADO", 0.0, 315, "ID", "BEIRO", 3825, "LOCAL"], [61476, 2, "BRACCO", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2025-07-25", "CONFIRMADO", 0.0, 315, "ID", "BEIRO", 2960, "LOCAL"], [61486, 1, "MIRTA ARMESTO", "MIRTA A. S.R.L.", "2025-07-07", "CONFIRMADO", 50.36, 333, "MODA", "BEIRO", 0, "LOCAL"], [61486, 2, "MIRTA ARMESTO", "MIRTA A. S.R.L.", "2025-07-07", "CONFIRMADO", 109.11, 333, "MODA", "BEIRO", 0, "LOCAL"], [61531, 1, "ORBIS CALORAMA", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2025-08-04", "CONFIRMADO", 0.0, 305, "ID", "BEIRO", 5520, "LOCAL"], [61554, 1, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-07-16", "CONFIRMADO", 0.0, 324, "ID", "BEIRO", 0, "EXPO"], [61554, 2, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-07-16", "CONFIRMADO", 0.0, 324, "ID", "BEIRO", 0, "EXPO"], [61555, 1, "STARITSKY LEVITSKY", "APCE - APHOLOS MUESTRAS DE EXPORTACION", "2025-07-23", "CONFIRMADO", 0.0, 317, "ID", "BEIRO", 0, "EXPO"], [61584, 1, "IMS", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2025-09-20", "CONFIRMADO", 0.0, 258, "ID", "BEIRO", 1700, "LOCAL"], [61592, 1, "CASTLE FREKE", "APCE - APHOLOS MUESTRAS DE EXPORTACION", "2025-08-06", "CONFIRMADO", 0.0, 303, "ID", "BEIRO", 0, "EXPO"], [61603, 1, "BLUE RUN", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-07-17", "CONFIRMADO", 0.0, 323, "ID", "BEIRO", 0, "EXPO"], [61603, 2, "BLUE RUN", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-07-17", "CONFIRMADO", 0.0, 323, "ID", "BEIRO", 0, "EXPO"], [61635, 1, "LA PULGA", "APCE - APHOLOS MUESTRAS DE EXPORTACION", "2025-08-01", "CONFIRMADO", 0.0, 308, "MODA", "BEIRO", 0, "EXPO"], [61653, 1, "BORA", "APB - MERCADERIA PARA STOCK", "2025-08-28", "CONFIRMADO", 0.0, 281, "MODA", "BEIRO", 0, "LOCAL"], [61662, 1, "BASALT", "APCE - APHOLOS MUESTRAS DE EXPORTACION", "2025-08-28", "CONFIRMADO", 0.0, 281, "ID", "BEIRO", 0, "EXPO"], [61662, 2, "BASALT", "APCE - APHOLOS MUESTRAS DE EXPORTACION", "2025-08-13", "CONFIRMADO", 0.0, 296, "ID", "BEIRO", 0, "EXPO"], [61682, 1, "PAULA CAHEN D\u00b4ANVERS", "PCDA S.A.", "2025-08-08", "CONFIRMADO", 0.0, 301, "MODA", "BEIRO", 0, "LOCAL"], [61698, 1, "VI\u00d1A TARAPAC\u00c1", "LIONBERT LLC", "2025-08-21", "CONFIRMADO", 0.0, 288, "ID", "BEIRO", 0, "EXPO"], [61715, 2, "LA PULGA", "APHOLOS ACCES. MEXICO  S.A. DE  C.V.", "2025-09-01", "EN PRODUCCI\u00d3N", 0.0, 277, "MODA", "BEIRO", 0, "EXPO"], [61718, 1, "PAULA CAHEN D\u00b4ANVERS", "APC - COMERCIAL", "2025-08-15", "CONFIRMADO", 0.0, 294, "MODA", "BEIRO", 0, "LOCAL"], [61734, 1, "nan", "APB - MERCADERIA PARA STOCK", "2025-09-03", "CONFIRMADO", 0.0, 275, "MODA", "BEIRO", 0, "LOCAL"], [61778, 1, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 2, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 3, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 4, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 5, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 6, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 7, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 8, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 9, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 10, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 11, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 12, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 13, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 14, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 15, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 16, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 17, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61778, 18, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-02", "CONFIRMADO", 0.0, 276, "ID", "BEIRO", 0, "EXPO"], [61788, 1, "TOYOTA", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2025-09-26", "CONFIRMADO", 0.0, 252, "ID", "BEIRO", 0, "LOCAL"], [61793, 1, "MONTGRASS", "AGRICOLA SAN JOSE DE PERALILLO S.A", "2025-10-30", "CONFIRMADO", 1260.0, 218, "ID", "BEIRO", 0, "EXPO"], [61800, 1, "WESTWARD", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-22", "CONFIRMADO", 0.0, 256, "ID", "BEIRO", 0, "EXPO"], [61800, 2, "WESTWARD", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 1, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 2, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 3, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 4, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 5, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 6, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 7, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 8, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 9, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 10, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 11, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 12, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 13, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 14, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 15, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 16, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 17, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61801, 18, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-08", "CONFIRMADO", 0.0, 270, "ID", "BEIRO", 0, "EXPO"], [61803, 1, "TAPI", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2025-09-16", "CONFIRMADO", 0.0, 262, "ID", "BEIRO", 0, "LOCAL"], [61819, 1, "KAIKEN", "KAIKEN SA", "2025-09-17", "CONFIRMADO", 0.0, 261, "ID", "BEIRO", 0, "LOCAL"], [61824, 1, "WESTWARD", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-11", "CONFIRMADO", 0.0, 267, "ID", "BEIRO", 0, "EXPO"], [61824, 2, "WESTWARD", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-09-11", "CONFIRMADO", 0.0, 267, "ID", "BEIRO", 0, "EXPO"], [61875, 1, "CASTLE FREKE", "APCE - APHOLOS MUESTRAS DE EXPORTACION", "2025-09-25", "CONFIRMADO", 0.0, 253, "ID", "BEIRO", 0, "EXPO"], [61875, 2, "CASTLE FREKE", "APCE - APHOLOS MUESTRAS DE EXPORTACION", "2025-09-18", "CONFIRMADO", 0.0, 260, "ID", "BEIRO", 0, "EXPO"], [61880, 1, "ABSTRACTA", "APB - MERCADERIA PARA STOCK", "2025-10-05", "CONFIRMADO", 880.97, 243, "MODA", "BEIRO", 3800, "LOCAL"], [61880, 2, "ABSTRACTA", "APB - MERCADERIA PARA STOCK", "2025-10-05", "CONFIRMADO", 880.97, 243, "MODA", "BEIRO", 5000, "LOCAL"], [61991, 1, "CORRAL DE PALOS", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2025-11-24", "CONFIRMADO", 0.0, 193, "ID", "BEIRO", 0, "LOCAL"], [62035, 1, "JAZMIN CHEBAR", "APB - MERCADERIA PARA STOCK", "2025-11-03", "CONFIRMADO", 0.0, 214, "MODA", "BEIRO", 5000, "LOCAL"], [62035, 2, "JAZMIN CHEBAR", "APB - MERCADERIA PARA STOCK", "2025-11-03", "CONFIRMADO", 0.0, 214, "MODA", "BEIRO", 5000, "LOCAL"], [62035, 3, "JAZMIN CHEBAR", "APB - MERCADERIA PARA STOCK", "2025-11-03", "CONFIRMADO", 0.0, 214, "MODA", "BEIRO", 5000, "LOCAL"], [62078, 1, "nan", "APB - MERCADERIA PARA STOCK", "2025-11-14", "CONFIRMADO", 0.0, 203, "MODA", "BEIRO", 5000, "LOCAL"], [62078, 2, "nan", "APB - MERCADERIA PARA STOCK", "2025-11-14", "CONFIRMADO", 0.0, 203, "MODA", "BEIRO", 4900, "LOCAL"], [62078, 3, "nan", "APB - MERCADERIA PARA STOCK", "2025-11-14", "CONFIRMADO", 0.0, 203, "MODA", "BEIRO", 5600, "LOCAL"], [62078, 4, "nan", "APB - MERCADERIA PARA STOCK", "2025-11-14", "CONFIRMADO", 0.0, 203, "MODA", "BEIRO", 5800, "LOCAL"], [62081, 1, "nan", "APB - MERCADERIA PARA STOCK", "2025-11-14", "CONFIRMADO", 0.0, 203, "MODA", "BEIRO", 12600, "LOCAL"], [62088, 1, "KOSIUKO", "APB - MERCADERIA PARA STOCK", "2025-11-15", "ASIGNADO", 0.0, 202, "MODA", "BEIRO", 0, "LOCAL"], [62156, 1, "CARDON", "APB - MERCADERIA PARA STOCK", "2026-01-10", "CONFIRMADO", 0.0, 146, "MODA", "BEIRO", 1500, "LOCAL"], [62156, 2, "CARDON", "APB - MERCADERIA PARA STOCK", "2026-01-10", "CONFIRMADO", 0.0, 146, "MODA", "BEIRO", 1000, "LOCAL"], [62160, 1, "REIF", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-11-20", "CONFIRMADO", 0.0, 197, "ID", "BEIRO", 2360, "EXPO"], [62189, 1, "ORBIS CALORAMA", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2026-01-30", "CONFIRMADO", 0.0, 126, "ID", "BEIRO", 0, "LOCAL"], [62265, 1, "TEJANO", "APB - MERCADERIA PARA STOCK", "2025-12-27", "CONFIRMADO", 0.0, 160, "MODA", "BEIRO", 10000, "LOCAL"], [62266, 1, "PRINCESA MIA", "APB - MERCADERIA PARA STOCK", "2026-12-27", "CONFIRMADO", 0.0, -205, "MODA", "BEIRO", 10000, "LOCAL"], [62267, 1, "GO NORTH", "APB - MERCADERIA PARA STOCK", "2026-12-27", "CONFIRMADO", 0.0, -205, "MODA", "BEIRO", 0, "LOCAL"], [62269, 1, "AF", "APB - MERCADERIA PARA STOCK", "2026-12-27", "CONFIRMADO", 0.0, -205, "MODA", "BEIRO", 10750, "LOCAL"], [62278, 1, "AUDAX", "APCE - APHOLOS MUESTRAS DE EXPORTACION", "2026-01-20", "CONFIRMADO", 0.0, 136, "ID", "BEIRO", 0, "EXPO"], [62278, 2, "AUDAX", "APCE - APHOLOS MUESTRAS DE EXPORTACION", "2026-01-20", "CONFIRMADO", 0.0, 136, "ID", "BEIRO", 0, "EXPO"], [62301, 2, "SPOETZL", "LIONBERT LLC", "2026-02-28", "CONFIRMADO", 0.0, 97, "ID", "BEIRO", 100, "EXPO"], [62301, 3, "SPOETZL", "LIONBERT LLC", "2026-02-28", "CONFIRMADO", 0.0, 97, "ID", "BEIRO", 0, "EXPO"], [62303, 1, "BORA", "APB - MERCADERIA PARA STOCK", "2026-01-13", "CONFIRMADO", 0.0, 143, "MODA", "BEIRO", 0, "LOCAL"], [62308, 1, "CAZCANES", "APHOLOS ACCES. MEXICO  S.A. DE  C.V.", "2026-01-26", "CONFIRMADO", 0.0, 130, "ID", "ASIA", 0, "EXPO"], [62308, 2, "CAZCANES", "APHOLOS ACCES. MEXICO  S.A. DE  C.V.", "2026-01-26", "CONFIRMADO", 0.0, 130, "ID", "ASIA", 0, "EXPO"], [62308, 3, "CAZCANES", "APHOLOS ACCES. MEXICO  S.A. DE  C.V.", "2026-01-26", "CONFIRMADO", 0.0, 130, "ID", "ASIA", 0, "EXPO"], [62327, 1, "IMOGENE+WILLIE", "APB - MERCADERIA PARA STOCK EXPORTACION", "2026-01-30", "CONFIRMADO", 0.0, 126, "MODA", "BEIRO", 0, "EXPO"], [62336, 2, "ORBIS CALORAMA", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2026-03-01", "CONFIRMADO", 0.0, 96, "ID", "BEIRO", 0, "LOCAL"], [62339, 5, "RICKY SARKANY", "INTERNACIONAL RICKY SARKANY S.A.", "2026-03-07", "EN PRODUCCI\u00d3N", 2153.31, 90, "MODA", "BEIRO", 0, "LOCAL"], [62353, 2, "POINT BLANK", "APHOLOS ACCES. MEXICO  S.A. DE  C.V.", "2026-02-06", "CONFIRMADO", 0.0, 119, "ID", "BEIRO", 0, "EXPO"], [62354, 1, "THE HARE WINE CO", "APB - MERCADERIA PARA STOCK EXPORTACION", "2026-02-06", "CONFIRMADO", 0.0, 119, "ID", "BEIRO", 0, "EXPO"], [62357, 1, "HUMBERTO CANALE", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2026-03-31", "CONFIRMADO", 0.0, 66, "ID", "BEIRO", 0, "LOCAL"], [62372, 1, "ORBIS CALORAMA", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2026-03-01", "CONFIRMADO", 0.0, 96, "ID", "BEIRO", 0, "LOCAL"], [62400, 1, "STOLLER", "APCE - APHOLOS MUESTRAS DE EXPORTACION", "2026-01-30", "CONFIRMADO", 0.0, 126, "ID", "ASIA", 0, "EXPO"], [62418, 1, "DAILY", "FRYDMAN LEON E HIJOS S.A.", "2026-04-20", "CONFIRMADO", 1099.0, 46, "MODA", "BEIRO", 0, "LOCAL"], [62419, 1, "WAMU", "FRYDMAN LEON E HIJOS S.A.", "2026-04-20", "CONFIRMADO", 1099.0, 46, "MODA", "BEIRO", 0, "LOCAL"], [62439, 1, "ESKABE", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2026-04-21", "CONFIRMADO", 0.0, 45, "ID", "BEIRO", 4000, "LOCAL"], [62439, 2, "ESKABE", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2026-04-07", "CONFIRMADO", 0.0, 59, "ID", "BEIRO", 0, "LOCAL"], [62439, 3, "ESKABE", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2026-04-07", "CONFIRMADO", 0.0, 59, "ID", "BEIRO", 0, "LOCAL"], [62440, 3, "ASS POCKET WHISKEY", "LIONBERT LLC", "2026-01-09", "EN PRODUCCI\u00d3N", 0.0, 147, "ID", "ASIA", 0, "EXPO"], [62440, 4, "ASS POCKET WHISKEY", "LIONBERT LLC", "2026-01-09", "EN PRODUCCI\u00d3N", 0.0, 147, "ID", "ASIA", 0, "EXPO"], [62442, 1, "CORRAL DE PALOS", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2026-04-24", "CONFIRMADO", 0.0, 42, "ID", "BEIRO", 0, "LOCAL"], [62449, 1, "ALTE ZEIT", "EMIL SCHEIBEL SCHWARZWALD-BRENNEREI GMBH", "2026-01-30", "CONFIRMADO", 0.0, 126, "ID", "ASIA", 0, "EXPO"], [62462, 2, "ESKABE", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2026-03-30", "CONFIRMADO", 0.0, 67, "ID", "BEIRO", 0, "LOCAL"], [62462, 3, "ESKABE", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2026-03-30", "CONFIRMADO", 0.0, 67, "ID", "BEIRO", 2760, "LOCAL"], [62473, 1, "MYDFLOWER", "APCE - APHOLOS MUESTRAS DE EXPORTACION", "2026-04-14", "CONFIRMADO", 0.0, 52, "ID", "ASIA", 0, "EXPO"], [62473, 2, "MYDFLOWER", "APCE - APHOLOS MUESTRAS DE EXPORTACION", "2026-04-14", "CONFIRMADO", 0.0, 52, "ID", "ASIA", 0, "EXPO"], [62483, 1, "JAZMIN CHEBAR", "OBISPO S.A.", "2026-04-18", "CONFIRMADO", 3473.3, 48, "MODA", "BEIRO", 0, "LOCAL"], [62488, 1, "ORBIS CALORAMA", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2026-04-15", "CONFIRMADO", 0.0, 51, "ID", "BEIRO", 0, "LOCAL"], [62491, 1, "COMBUSTION LOVE", "BLUE GROUP S.R.L.", "2026-04-21", "CONFIRMADO", 1044.14, 45, "MODA", "BEIRO", 0, "LOCAL"], [62499, 1, "NORTH OF SCOTLAND", "NORTH OF SCOTLAND DISTILLING CO LTD", "2026-03-20", "CONFIRMADO", 0.0, 77, "ID", "ASIA", 0, "EXPO"], [62500, 1, "NORTH OF SCOTLAND", "NORTH OF SCOTLAND DISTILLING CO LTD", "2026-03-20", "CONFIRMADO", 0.0, 77, "ID", "ASIA", 0, "EXPO"], [62501, 1, "ETIQUETA NEGRA", "CIA. ARGENTINA DE DISE\u00d1O S.A.", "2026-05-05", "CONFIRMADO", 492.52, 31, "MODA", "BEIRO", 0, "LOCAL"], [62501, 2, "ETIQUETA NEGRA", "CIA. ARGENTINA DE DISE\u00d1O S.A.", "2026-05-05", "CONFIRMADO", 492.52, 31, "MODA", "BEIRO", 0, "LOCAL"], [62501, 3, "ETIQUETA NEGRA", "CIA. ARGENTINA DE DISE\u00d1O S.A.", "2026-05-05", "CONFIRMADO", 656.7, 31, "MODA", "BEIRO", 0, "LOCAL"], [62501, 4, "ETIQUETA NEGRA", "CIA. ARGENTINA DE DISE\u00d1O S.A.", "2026-04-25", "CONFIRMADO", 278.26, 41, "MODA", "BEIRO", 0, "LOCAL"], [62501, 5, "ETIQUETA NEGRA", "CIA. ARGENTINA DE DISE\u00d1O S.A.", "2026-04-25", "CONFIRMADO", 278.26, 41, "MODA", "BEIRO", 0, "LOCAL"], [62501, 6, "ETIQUETA NEGRA", "CIA. ARGENTINA DE DISE\u00d1O S.A.", "2026-04-25", "CONFIRMADO", 278.26, 41, "MODA", "BEIRO", 0, "LOCAL"], [62521, 1, "ESTANCIAS", "TEXTIL DEL CAMPO", "2026-04-02", "CONFIRMADO", 2596.05, 64, "MODA", "BEIRO", 0, "LOCAL"], [62521, 2, "ESTANCIAS", "TEXTIL DEL CAMPO", "2026-04-02", "CONFIRMADO", 5192.11, 64, "MODA", "BEIRO", 0, "LOCAL"], [62524, 3, "STAR", "CONFECCIONES ARRECIFES SRL", "2026-04-24", "EN PRODUCCI\u00d3N", 1100.73, 42, "MODA", "BEIRO", 0, "LOCAL"], [62524, 4, "STAR", "CONFECCIONES ARRECIFES SRL", "2026-04-24", "EN PRODUCCI\u00d3N", 1100.73, 42, "MODA", "BEIRO", 0, "LOCAL"], [62525, 1, "DM", "DE MAIO MARIA PAULA", "2026-05-17", "EN PRODUCCI\u00d3N", 1374.52, 19, "MODA", "BEIRO", 0, "LOCAL"], [62525, 2, "DM", "DE MAIO MARIA PAULA", "2026-05-17", "EN PRODUCCI\u00d3N", 1374.52, 19, "MODA", "BEIRO", 0, "LOCAL"], [62525, 3, "DM", "DE MAIO MARIA PAULA", "2026-05-17", "EN PRODUCCI\u00d3N", 1374.52, 19, "MODA", "BEIRO", 0, "LOCAL"], [62530, 4, "RIP CURL", "CRISTOBAL COLON S.R.L.", "2026-03-26", "EN PRODUCCI\u00d3N", 730.36, 71, "MODA", "BEIRO", 0, "LOCAL"], [62530, 5, "RIP CURL", "CRISTOBAL COLON S.R.L.", "2026-04-04", "EN PRODUCCI\u00d3N", 1066.11, 62, "MODA", "BEIRO", 0, "LOCAL"], [62530, 6, "RIP CURL", "CRISTOBAL COLON S.R.L.", "2026-04-04", "EN PRODUCCI\u00d3N", 533.06, 62, "MODA", "BEIRO", 0, "LOCAL"], [62539, 3, "RIP CURL", "CRISTOBAL COLON S.R.L.", "2026-05-10", "CONFIRMADO", 63.44, 26, "MODA", "BEIRO", 0, "LOCAL"], [62540, 1, "CLOTER", "BAUHAUS S.A.", "2026-03-05", "CONFIRMADO", 933.43, 92, "MODA", "BEIRO", 0, "LOCAL"], [62540, 2, "CLOTER", "BAUHAUS S.A.", "2026-03-05", "CONFIRMADO", 1633.49, 92, "MODA", "BEIRO", 0, "LOCAL"], [62540, 3, "CLOTER", "BAUHAUS S.A.", "2026-03-05", "CONFIRMADO", 934.8, 92, "MODA", "BEIRO", 0, "LOCAL"], [62541, 1, "TRIBBIA", "GRUPO CALZADO FH S.R.L.", "2026-05-13", "BLOQUEADO PRECIO NO AUTORIZADO", 4135.08, 23, "MODA", "BEIRO", 0, "LOCAL"], [62551, 1, "KOSIUKO", "KOWZEF S.A.", "2026-05-01", "CONFIRMADO", 1459.22, 35, "MODA", "BEIRO", 0, "LOCAL"], [62555, 1, "MAGDALENA ESPOSITO", "JAMM S.R.L.", "2026-04-22", "CONFIRMADO", 1606.15, 44, "MODA", "BEIRO", 0, "LOCAL"], [62559, 1, "PILLITTERI", "LIONBERT LLC", "2026-04-21", "CONFIRMADO", 12900.0, 45, "ID", "BEIRO", 0, "EXPO"], [62560, 1, "PRECEPT WINES", "TRIBECA  IMP-EXP, INC", "2026-04-21", "CONFIRMADO", 11120.0, 45, "ID", "BEIRO", 3200, "EXPO"], [62561, 1, "JOKEMVI", "GLASSNE SRL", "2026-04-12", "CONFIRMADO", 1377.12, 54, "MODA", "BEIRO", 0, "LOCAL"], [62562, 1, "HUMBERTO CANALE", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2026-04-04", "CONFIRMADO", 0.0, 62, "ID", "BEIRO", 0, "LOCAL"], [62563, 1, "STARITSKY LEVITSKY", "STARITSKY DISTILERS LLC", "2026-04-16", "ASIGNADO", 39000.0, 50, "ID", "BEIRO", 59810, "EXPO"], [62567, 1, "STARITSKY LEVITSKY", "STARITSKY DISTILERS LLC", "2026-05-22", "ASIGNADO", 4800.0, 14, "ID", "BEIRO", 10000, "EXPO"], [62568, 1, "STONE EAGLE", "TRIBECA  IMP-EXP, INC", "2026-04-29", "CONFIRMADO", 4200.0, 37, "ID", "BEIRO", 0, "EXPO"], [62586, 1, "RIFFLE", "HAY CHAIA LUIS GERARDO", "2026-03-30", "CONFIRMADO", 756.7, 67, "MODA", "BEIRO", 0, "LOCAL"], [62586, 2, "RIFFLE", "HAY CHAIA LUIS GERARDO", "2026-03-30", "CONFIRMADO", 938.91, 67, "MODA", "BEIRO", 0, "LOCAL"], [62586, 3, "RIFFLE", "HAY CHAIA LUIS GERARDO", "2026-03-30", "CONFIRMADO", 625.94, 67, "MODA", "BEIRO", 0, "LOCAL"], [62586, 4, "RIFFLE", "HAY CHAIA LUIS GERARDO", "2026-03-30", "CONFIRMADO", 938.91, 67, "MODA", "BEIRO", 0, "LOCAL"], [62586, 5, "RIFFLE", "HAY CHAIA LUIS GERARDO", "2026-03-30", "CONFIRMADO", 756.7, 67, "MODA", "BEIRO", 0, "LOCAL"], [62607, 2, "HERENCIA ARGENTINA", "KOWZEF S.A.", "2026-04-23", "EN PRODUCCI\u00d3N", 1555.16, 43, "MODA", "BEIRO", 0, "LOCAL"], [62607, 4, "HERENCIA ARGENTINA", "KOWZEF S.A.", "2026-04-23", "EN PRODUCCI\u00d3N", 1772.79, 43, "MODA", "BEIRO", 0, "LOCAL"], [62607, 5, "HERENCIA ARGENTINA", "KOWZEF S.A.", "2026-04-23", "EN PRODUCCI\u00d3N", 1218.1, 43, "MODA", "BEIRO", 0, "LOCAL"], [62608, 1, "KOSIUKO", "KOWZEF S.A.", "2026-04-23", "CONFIRMADO", 2293.82, 43, "MODA", "BEIRO", 0, "LOCAL"], [62612, 1, "SPRINGWALL", "VAZQUEZ SACII", "2026-04-24", "EN PRODUCCI\u00d3N", 5100.0, 42, "ID", "BEIRO", 0, "LOCAL"], [62615, 1, "MONTAGNE", "MONTAGNE OUTDOORS SACIFIA", "2026-05-29", "EN PRODUCCI\u00d3N", 2261.95, 7, "MODA", "BEIRO", 0, "LOCAL"], [62618, 1, "TASCANI", "TAIPEI S.R.L.", "2026-04-25", "CONFIRMADO", 1005.43, 41, "MODA", "BEIRO", 0, "LOCAL"], [62618, 2, "TASCANI", "TAIPEI S.R.L.", "2026-04-25", "CONFIRMADO", 1243.03, 41, "MODA", "BEIRO", 0, "LOCAL"], [62618, 3, "TASCANI", "TAIPEI S.R.L.", "2026-04-25", "CONFIRMADO", 1724.01, 41, "MODA", "BEIRO", 0, "LOCAL"], [62618, 4, "TASCANI", "TAIPEI S.R.L.", "2026-04-19", "CONFIRMADO", 1906.56, 47, "MODA", "BEIRO", 0, "LOCAL"], [62618, 5, "TASCANI", "TAIPEI S.R.L.", "2026-04-19", "CONFIRMADO", 1361.83, 47, "MODA", "BEIRO", 0, "LOCAL"], [62618, 6, "TASCANI", "TAIPEI S.R.L.", "2026-04-19", "CONFIRMADO", 1080.04, 47, "MODA", "BEIRO", 0, "LOCAL"], [62619, 1, "ASKK", "TRIBECA  IMP-EXP, INC", "2026-03-18", "CONFIRMADO", 0.0, 79, "MODA", "BEIRO", 0, "EXPO"], [62621, 1, "MAGIAMORE", "MONTECAPRI LIMITED", "2026-03-19", "CONFIRMADO", 4480.0, 78, "ID", "BEIRO", 0, "EXPO"], [62621, 2, "MAGIAMORE", "MONTECAPRI LIMITED", "2026-03-19", "CONFIRMADO", 4480.0, 78, "ID", "BEIRO", 0, "EXPO"], [62621, 3, "MAGIAMORE", "MONTECAPRI LIMITED", "2026-03-19", "CONFIRMADO", 4480.0, 78, "ID", "BEIRO", 0, "EXPO"], [62624, 1, "KENNY", "THE KENNY COMPANY SRL", "2026-07-16", "EN PRODUCCI\u00d3N", 1286.63, -41, "MODA", "BEIRO", 0, "LOCAL"], [62624, 3, "KENNY", "THE KENNY COMPANY SRL", "2026-05-12", "EN PRODUCCI\u00d3N", 1250.89, 24, "MODA", "BEIRO", 0, "LOCAL"], [62624, 6, "KENNY", "THE KENNY COMPANY SRL", "2026-03-09", "EN PRODUCCI\u00d3N", 210.15, 88, "MODA", "BEIRO", 0, "LOCAL"], [62626, 1, "MOHA", "CESSION S.A.", "2026-05-04", "EN PRODUCCI\u00d3N", 1175.43, 32, "MODA", "BEIRO", 0, "LOCAL"], [62626, 2, "MOHA", "CESSION S.A.", "2026-05-04", "EN PRODUCCI\u00d3N", 1410.51, 32, "MODA", "BEIRO", 0, "LOCAL"], [62626, 3, "MOHA", "CESSION S.A.", "2026-05-04", "EN PRODUCCI\u00d3N", 1410.51, 32, "MODA", "BEIRO", 0, "LOCAL"], [62627, 1, "CENIDOR", "TEXTIL DEL CAMPO", "2026-05-04", "EN PRODUCCI\u00d3N", 2307.53, 32, "MODA", "BEIRO", 0, "LOCAL"], [62628, 1, "KOXIS", "NECHED SA", "2026-05-04", "EN PRODUCCI\u00d3N", 2737.93, 32, "MODA", "BEIRO", 0, "LOCAL"], [62628, 2, "KOXIS", "NECHED SA", "2026-04-24", "EN PRODUCCI\u00d3N", 2002.84, 42, "MODA", "BEIRO", 0, "LOCAL"], [62628, 4, "KOXIS", "NECHED SA", "2026-05-04", "EN PRODUCCI\u00d3N", 456.32, 32, "MODA", "BEIRO", 0, "LOCAL"], [62628, 6, "KOXIS", "NECHED SA", "2026-05-04", "EN PRODUCCI\u00d3N", 548.65, 32, "MODA", "BEIRO", 0, "LOCAL"], [62629, 2, "RIP CURL", "CRISTOBAL COLON S.R.L.", "2026-03-29", "EN PRODUCCI\u00d3N", 1093.75, 68, "MODA", "BEIRO", 0, "LOCAL"], [62629, 3, "RIP CURL", "CRISTOBAL COLON S.R.L.", "2026-03-29", "EN PRODUCCI\u00d3N", 1093.75, 68, "MODA", "BEIRO", 0, "LOCAL"], [62637, 1, "STADE\u00b4S RUM", "COGNAC FERRAND", "2026-06-08", "CONFIRMADO", 8820.0, -3, "ID", "BEIRO", 0, "EXPO"], [62640, 1, "VERONICA BEARD", "TRIBECA  IMP-EXP, INC", "2026-04-06", "CONFIRMADO", 0.0, 60, "MODA", "ASIA", 0, "EXPO"], [62640, 2, "VERONICA BEARD", "TRIBECA  IMP-EXP, INC", "2026-04-06", "CONFIRMADO", 0.0, 60, "MODA", "ASIA", 0, "EXPO"], [62640, 3, "VERONICA BEARD", "TRIBECA  IMP-EXP, INC", "2026-04-06", "CONFIRMADO", 0.0, 60, "MODA", "ASIA", 0, "EXPO"], [62640, 4, "VERONICA BEARD", "TRIBECA  IMP-EXP, INC", "2026-04-06", "CONFIRMADO", 0.0, 60, "MODA", "ASIA", 0, "EXPO"], [62640, 5, "VERONICA BEARD", "TRIBECA  IMP-EXP, INC", "2026-04-06", "CONFIRMADO", 0.0, 60, "MODA", "ASIA", 0, "EXPO"], [62640, 6, "VERONICA BEARD", "TRIBECA  IMP-EXP, INC", "2026-04-06", "CONFIRMADO", 0.0, 60, "MODA", "ASIA", 0, "EXPO"], [62645, 1, "CLAP & TONE", "DU SOLEIL S.A.", "2026-04-22", "CONFIRMADO", 898.37, 44, "MODA", "BEIRO", 0, "LOCAL"], [62645, 2, "CLAP & TONE", "DU SOLEIL S.A.", "2026-04-22", "CONFIRMADO", 898.37, 44, "MODA", "BEIRO", 0, "LOCAL"], [62645, 3, "CLAP & TONE", "DU SOLEIL S.A.", "2026-04-03", "CONFIRMADO", 1213.29, 63, "MODA", "BEIRO", 0, "LOCAL"], [62645, 4, "CLAP & TONE", "DU SOLEIL S.A.", "2026-04-03", "CONFIRMADO", 1213.29, 63, "MODA", "BEIRO", 0, "LOCAL"], [62650, 1, "BATUK", "BARHUT SRL", "2026-04-23", "CONFIRMADO", 822.56, 43, "MODA", "BEIRO", 0, "LOCAL"], [62650, 2, "BATUK", "BARHUT SRL", "2026-04-06", "CONFIRMADO", 491.25, 60, "MODA", "BEIRO", 0, "LOCAL"], [62654, 1, "BRASSFIELD ESTATE WINERY", "LIONBERT LLC", "2026-05-29", "CONFIRMADO", 26280.0, 7, "ID", "BEIRO", 12810, "EXPO"], [62654, 2, "BRASSFIELD ESTATE WINERY", "LIONBERT LLC", "2026-05-29", "CONFIRMADO", 10586.0, 7, "ID", "BEIRO", 1670, "EXPO"], [62655, 1, "OLD BRIDGE", "GRUPO LEGAR S.R.L.", "2026-04-24", "EN PRODUCCI\u00d3N", 710.73, 42, "MODA", "BEIRO", 0, "LOCAL"], [62655, 2, "OLD BRIDGE", "GRUPO LEGAR S.R.L.", "2026-04-24", "EN PRODUCCI\u00d3N", 690.83, 42, "MODA", "BEIRO", 0, "LOCAL"], [62655, 3, "OLD BRIDGE", "GRUPO LEGAR S.R.L.", "2026-04-24", "EN PRODUCCI\u00d3N", 431.77, 42, "MODA", "BEIRO", 0, "LOCAL"], [62655, 6, "OLD BRIDGE", "GRUPO LEGAR S.R.L.", "2026-04-24", "EN PRODUCCI\u00d3N", 533.05, 42, "MODA", "BEIRO", 0, "LOCAL"], [62656, 1, "DAILY", "FRYDMAN LEON E HIJOS S.A.", "2026-05-13", "CONFIRMADO", 1552.68, 23, "MODA", "BEIRO", 0, "LOCAL"], [62657, 1, "WAMU", "FRYDMAN LEON E HIJOS S.A.", "2026-05-13", "CONFIRMADO", 776.34, 23, "MODA", "BEIRO", 0, "LOCAL"], [62658, 1, "BAKER\u00b4S", "TRIBECA  IMP-EXP, INC", "2026-06-15", "CONFIRMADO", 15400.0, -10, "ID", "BEIRO", 0, "EXPO"], [62660, 1, "IBROO", "BROCATTO S.A.", "2026-05-13", "CONFIRMADO", 772.6, 23, "MODA", "BEIRO", 0, "LOCAL"], [62663, 1, "LORCAN", "LIGHTHOUSE DRINKS", "2026-06-15", "CONFIRMADO", 10300.0, -10, "ID", "ASIA", 0, "EXPO"], [62665, 2, "ESKABE", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2026-05-04", "CONFIRMADO", 0.0, 32, "ID", "BEIRO", 413, "LOCAL"], [62667, 1, "ASKK", "TRIBECA  IMP-EXP, INC", "2026-04-15", "CONFIRMADO", 0.0, 51, "MODA", "BEIRO", 0, "EXPO"], [62672, 1, "MAGDALENA ESPOSITO", "JAMM S.R.L.", "2026-05-15", "CONFIRMADO", 1461.86, 21, "MODA", "BEIRO", 0, "LOCAL"], [62675, 1, "KOSIUKO", "KOWZEF S.A.", "2026-05-06", "EN PRODUCCI\u00d3N", 1102.8, 30, "MODA", "BEIRO", 0, "LOCAL"], [62679, 1, "TIERRA NOBLE", "BRANDON PACKAGING", "2026-04-30", "CONFIRMADO", 0.0, 36, "ID", "ASIA", 0, "EXPO"], [62680, 1, "CAVALIER POLO", "RANCHOCAVALIER S.R.L", "2026-05-15", "CONFIRMADO", 1572.35, 21, "MODA", "BEIRO", 0, "LOCAL"], [62681, 1, "KINSELLA", "LIONBERT LLC", "2026-06-18", "CONFIRMADO", 2310.0, -13, "ID", "BEIRO", 0, "EXPO"], [62682, 1, "RIP CURL", "CRISTOBAL COLON S.R.L.", "2026-04-30", "EN PRODUCCI\u00d3N", 755.73, 36, "MODA", "BEIRO", 0, "LOCAL"], [62683, 4, "BORA", "PARK JULIA CAROLINA", "2026-04-10", "EN PRODUCCI\u00d3N", 1418.34, 56, "MODA", "BEIRO", 0, "LOCAL"], [62685, 1, "BILLABONG", "TARCO S.A.", "2026-04-30", "EN PRODUCCI\u00d3N", 983.87, 36, "MODA", "BEIRO", 0, "LOCAL"], [62685, 2, "BILLABONG", "TARCO S.A.", "2026-04-30", "EN PRODUCCI\u00d3N", 1475.8, 36, "MODA", "BEIRO", 0, "LOCAL"], [62685, 3, "BILLABONG", "TARCO S.A.", "2026-04-30", "EN PRODUCCI\u00d3N", 760.13, 36, "MODA", "BEIRO", 0, "LOCAL"], [62685, 4, "BILLABONG", "TARCO S.A.", "2026-04-30", "EN PRODUCCI\u00d3N", 760.13, 36, "MODA", "BEIRO", 0, "LOCAL"], [62687, 1, "PORTSAID", "MAZALOSA S.A.", "2026-05-18", "EN PRODUCCI\u00d3N", 1696.67, 18, "MODA", "BEIRO", 0, "LOCAL"], [62688, 1, "XENONA", "BELFITEX SRL", "2026-05-10", "CONFIRMADO", 982.43, 26, "MODA", "BEIRO", 0, "LOCAL"], [62693, 1, "AMERICAN COLT", "MJSL INSUMOS TEXTILES S.R.L", "2026-04-22", "CONFIRMADO", 1740.0, 44, "MODA", "BEIRO", 5800, "EXPO"], [62693, 3, "AMERICAN COLT", "MJSL INSUMOS TEXTILES S.R.L", "2026-04-22", "CONFIRMADO", 1750.0, 44, "MODA", "BEIRO", 0, "EXPO"], [62693, 4, "AMERICAN COLT", "MJSL INSUMOS TEXTILES S.R.L", "2026-04-22", "CONFIRMADO", 4800.0, 44, "MODA", "BEIRO", 1200, "EXPO"], [62693, 5, "AMERICAN COLT", "MJSL INSUMOS TEXTILES S.R.L", "2026-04-22", "CONFIRMADO", 495.0, 44, "MODA", "BEIRO", 0, "EXPO"], [62693, 6, "AMERICAN COLT", "MJSL INSUMOS TEXTILES S.R.L", "2026-04-22", "CONFIRMADO", 1845.0, 44, "MODA", "BEIRO", 500, "EXPO"], [62693, 7, "AMERICAN COLT", "MJSL INSUMOS TEXTILES S.R.L", "2026-04-22", "CONFIRMADO", 1845.0, 44, "MODA", "BEIRO", 1300, "EXPO"], [62694, 1, "NEGRO", "DRAGONES SERVICIOS SRL", "2026-05-30", "CONFIRMADO", 1611.75, 6, "MODA", "BEIRO", 0, "LOCAL"], [62696, 1, "TEQUILA PANTALONES", "BRANDON PACKAGING", "2026-04-06", "CONFIRMADO", 0.0, 60, "ID", "ASIA", 0, "EXPO"], [62699, 1, "ESTEFANIA BOLIVAR", "BOLIVAR ESTEFANIA", "2026-05-17", "CONFIRMADO", 1179.44, 19, "MODA", "BEIRO", 0, "LOCAL"], [62700, 1, "BUDDIES", "DALMATEX SA", "2026-05-17", "CONFIRMADO", 967.05, 19, "MODA", "BEIRO", 0, "LOCAL"], [62701, 1, "GARZA LOBOS", "GUIDETTI WEBER MARIA BELEN", "2026-05-12", "CONFIRMADO", 2836.25, 24, "MODA", "BEIRO", 2000, "LOCAL"], [62701, 2, "GARZA LOBOS", "GUIDETTI WEBER MARIA BELEN", "2026-05-12", "CONFIRMADO", 1890.83, 24, "MODA", "BEIRO", 0, "LOCAL"], [62701, 3, "GARZA LOBOS", "GUIDETTI WEBER MARIA BELEN", "2026-05-12", "CONFIRMADO", 1890.83, 24, "MODA", "BEIRO", 0, "LOCAL"], [62701, 4, "GARZA LOBOS", "GUIDETTI WEBER MARIA BELEN", "2026-05-19", "CONFIRMADO", 1669.86, 17, "MODA", "BEIRO", 0, "LOCAL"], [62701, 5, "GARZA LOBOS", "GUIDETTI WEBER MARIA BELEN", "2026-05-19", "CONFIRMADO", 1669.86, 17, "MODA", "BEIRO", 2300, "LOCAL"], [62701, 6, "GARZA LOBOS", "GUIDETTI WEBER MARIA BELEN", "2026-05-19", "CONFIRMADO", 1214.44, 17, "MODA", "BEIRO", 0, "LOCAL"], [62701, 7, "GARZA LOBOS", "GUIDETTI WEBER MARIA BELEN", "2026-04-17", "CONFIRMADO", 2462.03, 49, "MODA", "BEIRO", 75000, "LOCAL"], [62701, 8, "GARZA LOBOS", "GUIDETTI WEBER MARIA BELEN", "2026-04-17", "CONFIRMADO", 1055.16, 49, "MODA", "BEIRO", 5000, "LOCAL"], [62701, 9, "GARZA LOBOS", "GUIDETTI WEBER MARIA BELEN", "2026-04-17", "CONFIRMADO", 703.44, 49, "MODA", "BEIRO", 4200, "LOCAL"], [62705, 1, "VIGA", "AZALEE S.A.", "2026-04-18", "EN PRODUCCI\u00d3N", 667.48, 48, "MODA", "BEIRO", 0, "LOCAL"], [62705, 2, "VIGA", "AZALEE S.A.", "2026-04-18", "EN PRODUCCI\u00d3N", 929.91, 48, "MODA", "BEIRO", 0, "LOCAL"], [62705, 3, "VIGA", "AZALEE S.A.", "2026-04-18", "EN PRODUCCI\u00d3N", 807.46, 48, "MODA", "BEIRO", 0, "LOCAL"], [62705, 5, "VIGA", "AZALEE S.A.", "2026-04-18", "EN PRODUCCI\u00d3N", 936.4, 48, "MODA", "BEIRO", 0, "LOCAL"], [62706, 1, "INDEPENDENT", "CRISTOBAL COLON S.R.L.", "2026-05-15", "CONFIRMADO", 1747.85, 21, "MODA", "BEIRO", 0, "LOCAL"], [62707, 1, "MARKOVA", "RODAMA S.A.", "2026-05-23", "CONFIRMADO", 2399.71, 13, "MODA", "BEIRO", 0, "LOCAL"], [62708, 1, "NOXION", "GRUPO SASSINORO S.A.", "2026-04-18", "CONFIRMADO", 10270.7, 48, "MODA", "BEIRO", 0, "LOCAL"], [62711, 1, "MILLIE", "LANCOTT  S.R.L.", "2026-05-22", "CONFIRMADO", 1291.25, 14, "MODA", "BEIRO", 0, "LOCAL"], [62711, 2, "MILLIE", "LANCOTT  S.R.L.", "2026-05-22", "CONFIRMADO", 516.5, 14, "MODA", "BEIRO", 0, "LOCAL"], [62725, 1, "MEZCAL VAGO", "BRANDON PACKAGING", "2026-05-10", "CONFIRMADO", 0.0, 26, "ID", "ASIA", 0, "EXPO"], [62731, 1, "NEGRO", "DRAGONES SERVICIOS SRL", "2026-05-30", "CONFIRMADO", 1306.72, 6, "MODA", "BEIRO", 0, "LOCAL"], [62734, 2, "DAILY", "FRYDMAN LEON E HIJOS S.A.", "2026-04-26", "EN PRODUCCI\u00d3N", 679.03, 40, "MODA", "BEIRO", 0, "LOCAL"], [62735, 1, "WAMU", "FRYDMAN LEON E HIJOS S.A.", "2026-04-26", "CONFIRMADO", 638.43, 40, "MODA", "BEIRO", 0, "LOCAL"], [62735, 2, "WAMU", "FRYDMAN LEON E HIJOS S.A.", "2026-04-26", "CONFIRMADO", 679.03, 40, "MODA", "BEIRO", 0, "LOCAL"], [62736, 1, "FREY RANCH", "TRIBECA  IMP-EXP, INC", "2027-01-01", "CONFIRMADO", 107000.01, -210, "ID", "BEIRO", 0, "EXPO"], [62736, 2, "FREY RANCH", "TRIBECA  IMP-EXP, INC", "2027-05-01", "CONFIRMADO", 107000.01, -330, "ID", "BEIRO", 0, "EXPO"], [62742, 1, "VITNIK", "ANAVI S.A.", "2026-05-15", "CONFIRMADO", 3654.39, 21, "MODA", "BEIRO", 0, "LOCAL"], [62742, 2, "VITNIK", "ANAVI S.A.", "2026-05-15", "CONFIRMADO", 106.13, 21, "MODA", "BEIRO", 0, "LOCAL"], [62743, 1, "FIREWALL", "PROSEIND S.A.", "2026-05-05", "CONFIRMADO", 5399.12, 31, "MODA", "BEIRO", 0, "LOCAL"], [62743, 2, "FIREWALL", "PROSEIND S.A.", "2026-05-05", "CONFIRMADO", 536.84, 31, "MODA", "BEIRO", 15000, "LOCAL"], [62747, 2, "GRAN LUJO", "BRANDON PACKAGING", "2026-04-15", "CONFIRMADO", 400.0, 51, "ID", "BEIRO", 0, "EXPO"], [62752, 1, "LUNETTE", "LUNA ALAN EZEQUIEL", "2026-06-17", "CONFIRMADO", 809.04, -12, "MODA", "BEIRO", 0, "LOCAL"], [62752, 2, "LUNETTE", "LUNA ALAN EZEQUIEL", "2026-06-17", "CONFIRMADO", 485.42, -12, "MODA", "BEIRO", 0, "LOCAL"], [62752, 3, "LUNETTE", "LUNA ALAN EZEQUIEL", "2026-06-17", "CONFIRMADO", 485.42, -12, "MODA", "BEIRO", 0, "LOCAL"], [62752, 4, "LUNETTE", "LUNA ALAN EZEQUIEL", "2026-06-17", "CONFIRMADO", 44.85, -12, "MODA", "BEIRO", 0, "LOCAL"], [62755, 1, "SANTA", "PPHK CORPORARTION LTD", "2026-07-06", "CONFIRMADO", 9440.0, -31, "ID", "ASIA", 0, "EXPO"], [62759, 1, "AMERICAN COLT", "MJSL INSUMOS TEXTILES S.R.L", "2026-04-22", "CONFIRMADO", 1980.0, 44, "MODA", "BEIRO", 4280, "EXPO"], [62769, 1, "BARRET WINES", "LA SIRENA WINERY", "2026-07-14", "CONFIRMADO", 2750.0, -39, "ID", "BEIRO", 0, "EXPO"], [62770, 1, "METTA", "COOPERATIVA DE TRABAJO PRANA LIMITADA", "2026-05-27", "CONFIRMADO", 2175.16, 9, "MODA", "BEIRO", 0, "LOCAL"], [62770, 2, "METTA", "COOPERATIVA DE TRABAJO PRANA LIMITADA", "2026-05-27", "CONFIRMADO", 1608.04, 9, "MODA", "BEIRO", 0, "LOCAL"], [62773, 1, "KNOB CREEK", "TRIBECA  IMP-EXP, INC", "2026-06-19", "CONFIRMADO", 8580.0, -14, "ID", "BEIRO", 0, "EXPO"], [62775, 1, "NV", "FUHR VERONICA DE LOS MILAGROS", "2026-04-09", "CONFIRMADO", 1400.0, 57, "ID", "BEIRO", 0, "LOCAL"], [62781, 1, "NAPOLI", "ALSIM SRL", "2026-05-30", "CONFIRMADO", 1225.23, 6, "MODA", "BEIRO", 0, "LOCAL"], [62781, 2, "NAPOLI", "ALSIM SRL", "2026-05-30", "CONFIRMADO", 1470.27, 6, "MODA", "BEIRO", 0, "LOCAL"], [62781, 3, "NAPOLI", "ALSIM SRL", "2026-05-30", "CONFIRMADO", 1225.23, 6, "MODA", "BEIRO", 0, "LOCAL"], [62781, 4, "NAPOLI", "ALSIM SRL", "2026-05-30", "CONFIRMADO", 1470.27, 6, "MODA", "BEIRO", 0, "LOCAL"], [62782, 1, "PENDERYN", "THE WELSH WHISKY CO LTD", "2026-06-10", "CONFIRMADO", 960.0, -5, "ID", "ASIA", 0, "EXPO"], [62782, 2, "PENDERYN", "THE WELSH WHISKY CO LTD", "2026-06-10", "CONFIRMADO", 690.0, -5, "ID", "ASIA", 0, "EXPO"], [62782, 3, "PENDERYN", "THE WELSH WHISKY CO LTD", "2026-06-10", "CONFIRMADO", 690.0, -5, "ID", "ASIA", 0, "EXPO"], [62783, 1, "HORTENSIA", "FABRICACIONES DEL SUR S.A.", "2026-07-10", "CONFIRMADO", 2404.05, -35, "MODA", "BEIRO", 0, "LOCAL"], [62783, 3, "HORTENSIA", "FABRICACIONES DEL SUR S.A.", "2026-07-10", "CONFIRMADO", 1766.84, -35, "MODA", "BEIRO", 0, "LOCAL"], [62785, 1, "TRIDIMAGE", "RPB S.A.", "2026-04-10", "CONFIRMADO", 3250.0, 56, "ID", "BEIRO", 1400, "LOCAL"], [62786, 1, "NAHANA", "ALL DENIM S.A.", "2026-06-23", "CONFIRMADO", 2889.21, -18, "MODA", "BEIRO", 0, "LOCAL"], [62786, 2, "NAHANA", "ALL DENIM S.A.", "2026-06-23", "CONFIRMADO", 1194.79, -18, "MODA", "BEIRO", 0, "LOCAL"], [62792, 1, "VOLCOM", "CRISTOBAL COLON S.R.L.", "2026-06-15", "CONFIRMADO", 2908.03, -10, "MODA", "BEIRO", 0, "LOCAL"], [62792, 2, "VOLCOM", "CRISTOBAL COLON S.R.L.", "2026-06-15", "CONFIRMADO", 4434.31, -10, "MODA", "BEIRO", 0, "LOCAL"], [62792, 3, "VOLCOM", "CRISTOBAL COLON S.R.L.", "2026-06-15", "CONFIRMADO", 2255.47, -10, "MODA", "BEIRO", 0, "LOCAL"], [62792, 4, "VOLCOM", "CRISTOBAL COLON S.R.L.", "2026-06-15", "CONFIRMADO", 1335.77, -10, "MODA", "BEIRO", 0, "LOCAL"], [62793, 2, "BESTIUM", "BESTIUM DESTILERIA SA", "2026-05-30", "EN PRODUCCI\u00d3N", 2480.0, 6, "ID", "BEIRO", 0, "LOCAL"], [62798, 1, "LOCO", "BRANDON PACKAGING", "2026-04-28", "EN PRODUCCI\u00d3N", 10800.0, 38, "ID", "BEIRO", 0, "EXPO"], [62798, 3, "LOCO", "BRANDON PACKAGING", "2026-04-28", "EN PRODUCCI\u00d3N", 2700.0, 38, "ID", "BEIRO", 0, "EXPO"], [62798, 4, "LOCO", "BRANDON PACKAGING", "2026-04-28", "EN PRODUCCI\u00d3N", 2700.0, 38, "ID", "BEIRO", 0, "EXPO"], [62802, 4, "EURO", "MJSL INSUMOS TEXTILES S.R.L", "2026-07-20", "CONFIRMADO", 25.0, -45, "MODA", "BEIRO", 1, "EXPO"], [62805, 1, "SANTA CRUZ", "CRISTOBAL COLON S.R.L.", "2026-05-18", "CONFIRMADO", 2317.88, 18, "MODA", "BEIRO", 0, "LOCAL"], [62806, 2, "INDEPENDENT", "CRISTOBAL COLON S.R.L.", "2026-06-21", "EN PRODUCCI\u00d3N", 2980.13, -16, "MODA", "BEIRO", 0, "LOCAL"], [62812, 1, "BERRY PARK", "TRIBECA  IMP-EXP, INC", "2026-05-05", "CONFIRMADO", 0.0, 31, "ID", "ASIA", 0, "EXPO"], [62813, 1, "BLUE RUN", "APB - MERCADERIA PARA STOCK EXPORTACION", "2026-05-20", "CONFIRMADO", 0.0, 16, "ID", "BEIRO", 0, "EXPO"], [62814, 1, "DAY\u00b4S DEFILE", "LIONBERT LLC", "2026-05-29", "CONFIRMADO", 0.0, 7, "ID", "BEIRO", 0, "EXPO"], [62820, 1, "PAULA CAHEN D\u00b4ANVERS", "PCDA S.A.", "2026-06-11", "CONFIRMADO", 2082.73, -6, "MODA", "BEIRO", 0, "LOCAL"], [62822, 1, "CASTLE FREKE", "CASTLE FREKE DISTILLERY LTD", "2026-05-08", "CONFIRMADO", 0.0, 28, "ID", "BEIRO", 1, "EXPO"], [62823, 1, "CASAZAR", "BRANDON PACKAGING", "2026-05-08", "CONFIRMADO", 0.0, 28, "ID", "ASIA", 0, "EXPO"], [62823, 2, "CASAZAR", "BRANDON PACKAGING", "2026-05-08", "CONFIRMADO", 0.0, 28, "ID", "ASIA", 0, "EXPO"], [62826, 1, "FLASHOVER", "FLASHOVER EQUIPAMENT SAS", "2026-05-18", "CONFIRMADO", 4274.43, 18, "MODA", "BEIRO", 0, "LOCAL"], [62832, 2, "GINEBRA", "ELLEY S.A.", "2026-06-29", "EN PRODUCCI\u00d3N", 3108.25, -24, "MODA", "BEIRO", 0, "LOCAL"], [62832, 4, "GINEBRA", "ELLEY S.A.", "2026-06-29", "EN PRODUCCI\u00d3N", 6838.16, -24, "MODA", "BEIRO", 0, "LOCAL"], [62835, 1, "PAUL SUTTON BOURBON", "TRIBECA  IMP-EXP, INC", "2026-05-06", "CONFIRMADO", 5100.0, 30, "ID", "BEIRO", 0, "EXPO"], [62838, 1, "DARC CUIR", "ACEVEDO DANIEL Y ACEVEDO RAFAEL", "2026-06-12", "CONFIRMADO", 4368.38, -7, "MODA", "BEIRO", 0, "LOCAL"], [62839, 1, "DODGERS", "TEXTIL MILANO S.R.L.", "2026-07-28", "CONFIRMADO", 1376.15, -53, "MODA", "BEIRO", 0, "LOCAL"], [62841, 1, "KING OF THE KONGO", "UMAVAMA S.R.L", "2026-06-19", "CONFIRMADO", 1260.23, -14, "MODA", "BEIRO", 0, "LOCAL"], [62842, 1, "PRUNE", "GAX S.A.", "2026-06-29", "CONFIRMADO", 2456.39, -24, "MODA", "BEIRO", 0, "LOCAL"], [62843, 1, "STETSON", "STETSON SPIRITS LLC", "2026-05-21", "CONFIRMADO", 0.0, 15, "ID", "BEIRO", 0, "EXPO"], [62844, 1, "KARAS", "TIERRAS DE ARMENIA CJSC", "2026-07-08", "CONFIRMADO", 2100.0, -33, "ID", "ASIA", 0, "EXPO"], [62844, 2, "KARAS", "TIERRAS DE ARMENIA CJSC", "2026-07-08", "CONFIRMADO", 6765.0, -33, "ID", "ASIA", 0, "EXPO"], [62845, 1, "MAGIAMORE", "MONTECAPRI LIMITED", "2026-03-17", "CONFIRMADO", 5500.0, 80, "ID", "BEIRO", 13920, "EXPO"], [62848, 1, "RUPERT - PRESTIGE CUVEE MCC", "ANTHONIJ RUPERT WYNE (PTY) LTD", "2026-07-09", "CONFIRMADO", 5900.0, -34, "ID", "BEIRO", 0, "EXPO"], [62848, 2, "RUPERT - PRESTIGE CUVEE MCC", "ANTHONIJ RUPERT WYNE (PTY) LTD", "2026-07-30", "CONFIRMADO", 4600.0, -55, "ID", "BEIRO", 0, "EXPO"], [62849, 1, "VOLCOM", "CRISTOBAL COLON S.R.L.", "2026-06-10", "CONFIRMADO", 1068.0, -5, "MODA", "BEIRO", 0, "LOCAL"], [62851, 1, "CAVATINI", "TECAL S.A.", "2026-07-01", "CONFIRMADO", 12103.95, -26, "MODA", "BEIRO", 0, "LOCAL"], [62852, 1, "PROMETEO", "DISTILLERIE  BONOLLO UMBERTO S.P.A.", "2026-07-20", "CONFIRMADO", 5580.0, -45, "ID", "BEIRO", 350, "EXPO"], [62853, 1, "FIREWALL", "PROSEIND S.A.", "2026-07-29", "CONFIRMADO", 10517.62, -54, "MODA", "BEIRO", 0, "LOCAL"], [62853, 2, "FIREWALL", "PROSEIND S.A.", "2026-07-29", "CONFIRMADO", 982.98, -54, "MODA", "BEIRO", 30000, "LOCAL"], [62854, 1, "A.Y.NOT DEAD", "A.Y. NOT DEAD S.A.", "2026-06-15", "CONFIRMADO", 2349.59, -10, "MODA", "BEIRO", 0, "LOCAL"], [62854, 2, "A.Y.NOT DEAD", "A.Y. NOT DEAD S.A.", "2026-06-15", "CONFIRMADO", 1217.52, -10, "MODA", "BEIRO", 0, "LOCAL"], [62854, 3, "A.Y.NOT DEAD", "A.Y. NOT DEAD S.A.", "2026-06-15", "CONFIRMADO", 3524.39, -10, "MODA", "BEIRO", 0, "LOCAL"], [62854, 4, "A.Y.NOT DEAD", "A.Y. NOT DEAD S.A.", "2026-06-15", "CONFIRMADO", 2232.11, -10, "MODA", "BEIRO", 0, "LOCAL"], [62854, 5, "A.Y.NOT DEAD", "A.Y. NOT DEAD S.A.", "2026-06-15", "CONFIRMADO", 1779.99, -10, "MODA", "BEIRO", 0, "LOCAL"], [62861, 1, "GATA FLORA", "VASIJA SECRETA S.A", "2026-06-14", "EN PRODUCCI\u00d3N", 3150.0, -9, "ID", "BEIRO", 0, "LOCAL"], [62863, 1, "BOLIVIA", "THE WALRUS S.A.", "2026-06-16", "CONFIRMADO", 212.8, -11, "MODA", "BEIRO", 0, "LOCAL"], [62863, 2, "BOLIVIA", "THE WALRUS S.A.", "2026-06-16", "CONFIRMADO", 67.58, -11, "MODA", "BEIRO", 0, "LOCAL"], [62863, 3, "BOLIVIA", "THE WALRUS S.A.", "2026-06-16", "CONFIRMADO", 56.07, -11, "MODA", "BEIRO", 0, "LOCAL"], [62864, 1, "DIVINA", "THE WALRUS S.A.", "2026-06-29", "CONFIRMADO", 1674.33, -24, "MODA", "BEIRO", 0, "LOCAL"], [62864, 2, "DIVINA", "THE WALRUS S.A.", "2026-06-16", "CONFIRMADO", 108.04, -11, "MODA", "BEIRO", 0, "LOCAL"], [62866, 1, "PROMETEO", "DISTILLERIE  BONOLLO UMBERTO S.P.A.", "2026-06-01", "CONFIRMADO", 0.0, 4, "ID", "ASIA", 0, "EXPO"], [62867, 1, "WHITEHALL LANE WINERY", "LEONARDINI FAMILY WINERY LLC", "2026-08-10", "CONFIRMADO", 4365.0, -66, "ID", "BEIRO", 0, "EXPO"], [62867, 2, "WHITEHALL LANE WINERY", "LEONARDINI FAMILY WINERY LLC", "2026-08-10", "CONFIRMADO", 4559.0, -66, "ID", "BEIRO", 0, "EXPO"], [62867, 3, "WHITEHALL LANE WINERY", "LEONARDINI FAMILY WINERY LLC", "2026-08-10", "CONFIRMADO", 3465.0, -66, "ID", "BEIRO", 0, "EXPO"], [62868, 1, "VERONICA BEARD", "MACAU YONG CHUN INTERNATIONAL DEVELOPMENT COMPANY LID", "2026-06-02", "CONFIRMADO", 608.0, 3, "MODA", "ASIA", 0, "EXPO"], [62868, 2, "VERONICA BEARD", "MACAU YONG CHUN INTERNATIONAL DEVELOPMENT COMPANY LID", "2026-06-02", "CONFIRMADO", 312.0, 3, "MODA", "ASIA", 0, "EXPO"], [62868, 3, "VERONICA BEARD", "MACAU YONG CHUN INTERNATIONAL DEVELOPMENT COMPANY LID", "2026-06-02", "CONFIRMADO", 1294.3, 3, "MODA", "ASIA", 0, "EXPO"], [62868, 4, "VERONICA BEARD", "MACAU YONG CHUN INTERNATIONAL DEVELOPMENT COMPANY LID", "2026-06-02", "CONFIRMADO", 657.9, 3, "MODA", "ASIA", 0, "EXPO"], [62869, 1, "VERONICA BEARD", "MACAU YONG CHUN INTERNATIONAL DEVELOPMENT COMPANY LID", "2026-06-02", "CONFIRMADO", 152.0, 3, "MODA", "ASIA", 0, "EXPO"], [62869, 3, "VERONICA BEARD", "MACAU YONG CHUN INTERNATIONAL DEVELOPMENT COMPANY LID", "2026-06-02", "CONFIRMADO", 160.0, 3, "MODA", "ASIA", 0, "EXPO"], [62869, 5, "VERONICA BEARD", "MACAU YONG CHUN INTERNATIONAL DEVELOPMENT COMPANY LID", "2026-06-02", "CONFIRMADO", 339.7, 3, "MODA", "ASIA", 0, "EXPO"], [62871, 1, "PRINCESA MIA", "VINTAGE S.A.", "2026-07-31", "CONFIRMADO", 3027.03, -56, "MODA", "BEIRO", 0, "LOCAL"], [62871, 2, "PRINCESA MIA", "VINTAGE S.A.", "2026-07-31", "CONFIRMADO", 1780.16, -56, "MODA", "BEIRO", 0, "LOCAL"], [62871, 3, "PRINCESA MIA", "VINTAGE S.A.", "2026-07-31", "CONFIRMADO", 3027.03, -56, "MODA", "BEIRO", 0, "LOCAL"], [62871, 4, "PRINCESA MIA", "VINTAGE S.A.", "2026-07-31", "CONFIRMADO", 1780.16, -56, "MODA", "BEIRO", 0, "LOCAL"], [62872, 1, "GO NORTH", "VINTAGE S.A.", "2026-07-31", "CONFIRMADO", 3027.03, -56, "MODA", "BEIRO", 0, "LOCAL"], [62872, 2, "GO NORTH", "VINTAGE S.A.", "2026-07-31", "CONFIRMADO", 1780.16, -56, "MODA", "BEIRO", 0, "LOCAL"], [62873, 1, "ID", "CHIETTI SAS", "2026-07-31", "CONFIRMADO", 2234.94, -56, "MODA", "BEIRO", 0, "LOCAL"], [62874, 1, "J BOOKWALTER", "J. BOOKWALTER WINE", "2026-07-28", "CONFIRMADO", 3612.0, -53, "ID", "BEIRO", 0, "EXPO"], [62874, 2, "J BOOKWALTER", "J. BOOKWALTER WINE", "2026-07-28", "CONFIRMADO", 3612.0, -53, "ID", "BEIRO", 0, "EXPO"], [62874, 3, "J BOOKWALTER", "J. BOOKWALTER WINE", "2026-07-28", "CONFIRMADO", 2852.0, -53, "ID", "BEIRO", 0, "EXPO"], [62876, 2, "TEQUILA 30/30", "BRANDON PACKAGING", "2026-07-21", "CONFIRMADO", 6090.0, -46, "ID", "ASIA", 0, "EXPO"], [62877, 1, "BONJOUR LULU", "BATELMAN SA", "2026-06-25", "CONFIRMADO", 1507.54, -20, "MODA", "BEIRO", 0, "LOCAL"], [62877, 2, "BONJOUR LULU", "BATELMAN SA", "2026-06-25", "CONFIRMADO", 1507.54, -20, "MODA", "BEIRO", 0, "LOCAL"], [62878, 1, "BENRUACH", "BESTO S.R.L.", "2026-06-06", "CONFIRMADO", 2100.0, -1, "ID", "BEIRO", 0, "LOCAL"], [62879, 1, "BENRUACH", "BESTO S.R.L.", "2026-06-06", "CONFIRMADO", 3875.0, -1, "ID", "BEIRO", 0, "LOCAL"], [62884, 1, "LOVELY DENIM", "LOVE IN S.A.", "2026-07-10", "CONFIRMADO", 13400.58, -35, "MODA", "BEIRO", 0, "LOCAL"], [62884, 2, "LOVELY DENIM", "LOVE IN S.A.", "2026-07-10", "CONFIRMADO", 4538.9, -35, "MODA", "BEIRO", 0, "LOCAL"], [62891, 3, "DONDE VAYAS VOY", "DONDE VAYAS VOY S. A.", "2026-07-07", "CONFIRMADO", 1685.88, -32, "MODA", "BEIRO", 0, "LOCAL"], [62891, 4, "DONDE VAYAS VOY", "DONDE VAYAS VOY S. A.", "2026-07-07", "CONFIRMADO", 1837.18, -32, "MODA", "BEIRO", 0, "LOCAL"], [62891, 5, "DONDE VAYAS VOY", "DONDE VAYAS VOY S. A.", "2026-07-07", "CONFIRMADO", 1685.88, -32, "MODA", "BEIRO", 0, "LOCAL"], [62891, 6, "DONDE VAYAS VOY", "DONDE VAYAS VOY S. A.", "2026-07-07", "CONFIRMADO", 1837.18, -32, "MODA", "BEIRO", 0, "LOCAL"], [62891, 7, "DONDE VAYAS VOY", "DONDE VAYAS VOY S. A.", "2026-07-07", "CONFIRMADO", 46.83, -32, "MODA", "BEIRO", 0, "LOCAL"], [62891, 8, "DONDE VAYAS VOY", "DONDE VAYAS VOY S. A.", "2026-07-07", "CONFIRMADO", 32.42, -32, "MODA", "BEIRO", 0, "LOCAL"], [62895, 1, "APHOLOS", "IJW WHISKEY CO LLC", "2026-06-01", "CONFIRMADO", 16920.0, 4, "ID", "BEIRO", 0, "EXPO"], [62897, 1, "PROMETEO", "DISTILLERIE  BONOLLO UMBERTO S.P.A.", "2026-07-20", "CONFIRMADO", 12180.0, -45, "ID", "BEIRO", 0, "EXPO"], [62898, 1, "ST. MICHELLE", "STE. MICHELLE WINE ESTATES", "2026-08-28", "CONFIRMADO", 7722.0, -84, "ID", "BEIRO", 0, "EXPO"], [62898, 2, "ST. MICHELLE", "STE. MICHELLE WINE ESTATES", "2026-08-28", "CONFIRMADO", 600.0, -84, "ID", "BEIRO", 0, "EXPO"], [62899, 1, "MERUS", "FOLEY FAMILY WINES, INC.", "2026-08-15", "CONFIRMADO", 5300.0, -71, "ID", "BEIRO", 0, "EXPO"], [62899, 2, "MERUS", "FOLEY FAMILY WINES, INC.", "2026-08-15", "CONFIRMADO", 400.0, -71, "ID", "BEIRO", 0, "EXPO"], [62900, 1, "MOHA", "CESSION S.A.", "2026-08-07", "CONFIRMADO", 2478.39, -63, "MODA", "BEIRO", 0, "LOCAL"], [62900, 2, "MOHA", "CESSION S.A.", "2026-08-07", "CONFIRMADO", 1264.41, -63, "MODA", "BEIRO", 0, "LOCAL"], [62902, 1, "VERONICA BEARD", "MACAU YONG CHUN INTERNATIONAL DEVELOPMENT COMPANY LID", "2026-06-02", "CONFIRMADO", 80.0, 3, "MODA", "ASIA", 0, "EXPO"], [62902, 2, "VERONICA BEARD", "MACAU YONG CHUN INTERNATIONAL DEVELOPMENT COMPANY LID", "2026-06-02", "CONFIRMADO", 73.1, 3, "MODA", "ASIA", 0, "EXPO"], [62904, 1, "STATURE", "TRIBECA  IMP-EXP, INC", "2026-08-03", "CONFIRMADO", 3150.0, -59, "ID", "BEIRO", 0, "EXPO"], [62906, 1, "PAMPERO", "RIEMERSO S.A.", "2026-06-30", "CONFIRMADO", 1127.17, -25, "MODA", "BEIRO", 0, "LOCAL"], [62906, 2, "PAMPERO", "RIEMERSO S.A.", "2026-06-30", "CONFIRMADO", 2210.98, -25, "MODA", "BEIRO", 0, "LOCAL"], [62908, 1, "LAS PEPAS", "DO\u00d1A RAMONA S.A.", "2026-06-13", "CONFIRMADO", 2478.45, -8, "MODA", "BEIRO", 0, "LOCAL"], [62909, 1, "HUAPI", "INDUS. ARG. DE LA INDUMENTARIA S.A.", "2026-07-09", "CONFIRMADO", 4243.1, -34, "MODA", "BEIRO", 0, "LOCAL"], [62910, 1, "JALISCO", "LUNA ALAN EZEQUIEL", "2026-07-09", "CONFIRMADO", 2586.21, -34, "MODA", "BEIRO", 0, "LOCAL"], [62911, 1, "BORA", "PARK JULIA CAROLINA", "2026-07-09", "CONFIRMADO", 2241.38, -34, "MODA", "BEIRO", 0, "LOCAL"], [62911, 2, "BORA", "PARK JULIA CAROLINA", "2026-07-09", "CONFIRMADO", 3663.79, -34, "MODA", "BEIRO", 0, "LOCAL"], [62911, 3, "BORA", "PARK JULIA CAROLINA", "2026-07-09", "CONFIRMADO", 3362.07, -34, "MODA", "BEIRO", 0, "LOCAL"], [62911, 4, "BORA", "PARK JULIA CAROLINA", "2026-07-09", "CONFIRMADO", 3362.07, -34, "MODA", "BEIRO", 0, "LOCAL"], [62911, 5, "BORA", "PARK JULIA CAROLINA", "2026-07-09", "CONFIRMADO", 5495.69, -34, "MODA", "BEIRO", 0, "LOCAL"], [62913, 1, "THE MAVEN", "IJW WHISKEY CO LLC", "2026-07-10", "CONFIRMADO", 2330.0, -35, "ID", "BEIRO", 0, "EXPO"], [62918, 1, "NULLAKI", "THE NULLAKI DISTILLING COMPANY PTY LTD", "2026-08-18", "CONFIRMADO", 0.0, -74, "ID", "BEIRO", 0, "EXPO"], [62919, 1, "CAVATINI", "TECAL S.A.", "2026-08-18", "CONFIRMADO", 6260.31, -74, "MODA", "BEIRO", 0, "LOCAL"], [62920, 1, "ECCOMI CUA", "TORQUI PABLO", "2026-07-27", "CONFIRMADO", 2850.48, -52, "MODA", "BEIRO", 0, "LOCAL"], [62920, 2, "ECCOMI CUA", "TORQUI PABLO", "2026-07-27", "CONFIRMADO", 2710.65, -52, "MODA", "BEIRO", 0, "LOCAL"], [62920, 3, "ECCOMI CUA", "TORQUI PABLO", "2026-07-27", "CONFIRMADO", 2366.44, -52, "MODA", "BEIRO", 0, "LOCAL"], [62920, 4, "ECCOMI CUA", "TORQUI PABLO", "2026-07-27", "CONFIRMADO", 2280.39, -52, "MODA", "BEIRO", 0, "LOCAL"], [62920, 5, "ECCOMI CUA", "TORQUI PABLO", "2026-07-27", "CONFIRMADO", 2366.44, -52, "MODA", "BEIRO", 0, "LOCAL"], [62920, 6, "ECCOMI CUA", "TORQUI PABLO", "2026-07-27", "CONFIRMADO", 1900.32, -52, "MODA", "BEIRO", 0, "LOCAL"], [62920, 7, "ECCOMI CUA", "TORQUI PABLO", "2026-07-27", "CONFIRMADO", 3614.2, -52, "MODA", "BEIRO", 0, "LOCAL"], [62920, 8, "ECCOMI CUA", "TORQUI PABLO", "2026-07-27", "CONFIRMADO", 2366.44, -52, "MODA", "BEIRO", 0, "LOCAL"], [62922, 1, "ROCHAS", "PROFIT LABELS S.A.", "2026-06-30", "CONFIRMADO", 2301.9, -25, "MODA", "BEIRO", 0, "LOCAL"], [62922, 2, "ROCHAS", "PROFIT LABELS S.A.", "2026-07-30", "CONFIRMADO", 3226.96, -55, "MODA", "BEIRO", 0, "LOCAL"], [62924, 1, "PROMETEO", "DISTILLERIE  BONOLLO UMBERTO S.P.A.", "2026-06-22", "CONFIRMADO", 2700.0, -17, "ID", "ASIA", 0, "EXPO"], [62927, 1, "VITNIK", "ANAVI S.A.", "2026-08-10", "CONFIRMADO", 3578.53, -66, "MODA", "BEIRO", 0, "LOCAL"], [62929, 1, "MONTE VIEJO", "MONTEVIEJO S.A.", "2026-07-13", "CONFIRMADO", 2500.0, -38, "ID", "BEIRO", 0, "LOCAL"], [62931, 1, "SEPPELTSFIELD ROAD DISTILLERS", "SEPPELTSFIELD ROAD DISTILLERS", "2026-07-15", "CONFIRMADO", 4600.0, -40, "ID", "ASIA", 0, "EXPO"], [62935, 1, "FELIPE SALVADOR", "LUPO S.R.L.", "2026-08-20", "CONFIRMADO", 1304.72, -76, "MODA", "BEIRO", 0, "LOCAL"], [62936, 1, "SANTA", "PPHK CORPORARTION LTD", "2026-07-06", "CONFIRMADO", 9440.0, -31, "ID", "ASIA", 0, "EXPO"], [62938, 1, "ORBIS CALORAMA", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2026-06-15", "CONFIRMADO", 0.0, -10, "ID", "BEIRO", 2000, "LOCAL"], [62938, 2, "ORBIS CALORAMA", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2026-07-15", "CONFIRMADO", 0.0, -40, "ID", "BEIRO", 0, "LOCAL"], [62947, 2, "TANNERY", "INDUS. ARG. DE LA INDUMENTARIA S.A.", "2026-08-20", "CONFIRMADO", 5097.66, -76, "MODA", "BEIRO", 0, "LOCAL"], [62947, 3, "TANNERY", "INDUS. ARG. DE LA INDUMENTARIA S.A.", "2026-08-20", "CONFIRMADO", 2903.2, -76, "MODA", "BEIRO", 0, "LOCAL"], [62948, 1, "JUSTA PETRA", "COMPA\u00d1IA TEXTIL PATAGONICA SRL", "2026-08-03", "CONFIRMADO", 2087.08, -59, "MODA", "BEIRO", 0, "LOCAL"], [62949, 1, "ANSILTA", "CAMPAMENTO S.A.", "2026-06-16", "CONFIRMADO", 102.91, -11, "MODA", "BEIRO", 0, "LOCAL"], [62951, 1, "THE LAST ONE HUNDRED", "NO PLAID BRANDS LLC", "2026-08-14", "CONFIRMADO", 7500.0, -70, "ID", "ASIA", 0, "EXPO"], [62952, 1, "THE LAST ONE HUNDRED", "NO PLAID BRANDS LLC", "2026-08-14", "CONFIRMADO", 63600.0, -70, "ID", "BEIRO", 0, "EXPO"], [62952, 2, "THE LAST ONE HUNDRED", "NO PLAID BRANDS LLC", "2026-08-14", "CONFIRMADO", 30900.0, -70, "ID", "BEIRO", 0, "EXPO"], [62954, 1, "RASA INDUMENTARIA PROTECTIVA", "INDUMENTARIA PROTECTIVA RASA S.A.", "2026-08-10", "CONFIRMADO", 7890.24, -66, "MODA", "BEIRO", 0, "LOCAL"], [62954, 2, "RASA INDUMENTARIA PROTECTIVA", "INDUMENTARIA PROTECTIVA RASA S.A.", "2026-08-10", "CONFIRMADO", 1368.5, -66, "MODA", "BEIRO", 0, "LOCAL"], [62957, 1, "EL ESPARTANO", "EL ESPARTANO S.A.", "2026-07-11", "CONFIRMADO", 2820.69, -36, "MODA", "BEIRO", 0, "LOCAL"], [62960, 1, "ST. MICHELLE", "STE. MICHELLE WINE ESTATES", "2026-08-06", "CONFIRMADO", 2178.0, -62, "ID", "BEIRO", 0, "EXPO"], [62961, 1, "CLASE AZUL", "APB - MERCADERIA PARA STOCK EXPORTACION", "2026-06-19", "CONFIRMADO", 0.0, -14, "ID", "ASIA", 0, "EXPO"], [62961, 2, "CLASE AZUL", "APB - MERCADERIA PARA STOCK EXPORTACION", "2026-06-19", "CONFIRMADO", 0.0, -14, "ID", "ASIA", 0, "EXPO"], [62961, 3, "CLASE AZUL", "APB - MERCADERIA PARA STOCK EXPORTACION", "2026-06-19", "CONFIRMADO", 0.0, -14, "ID", "ASIA", 0, "EXPO"], [62962, 1, "JAZMIN CHEBAR", "OBISPO S.A.", "2026-06-30", "CONFIRMADO", 126.02, -25, "MODA", "BEIRO", 0, "LOCAL"], [62963, 1, "TEQUILA 30/30", "BRANDON PACKAGING", "2026-07-21", "CONFIRMADO", 2170.0, -46, "ID", "ASIA", 0, "EXPO"], [62964, 1, "LUNA DE JALISCO", "BRANDON PACKAGING", "2026-08-20", "CONFIRMADO", 9083.0, -76, "ID", "BEIRO", 0, "EXPO"], [62964, 2, "LUNA DE JALISCO", "BRANDON PACKAGING", "2026-08-20", "CONFIRMADO", 6603.0, -76, "ID", "BEIRO", 0, "EXPO"], [62964, 3, "LUNA DE JALISCO", "BRANDON PACKAGING", "2026-08-20", "CONFIRMADO", 2821.0, -76, "ID", "BEIRO", 0, "EXPO"], [62965, 1, "PROMETEO", "DISTILLERIE  BONOLLO UMBERTO S.P.A.", "2026-08-20", "CONFIRMADO", 8550.0, -76, "ID", "ASIA", 0, "EXPO"], [62966, 1, "KARAS", "TIERRAS DE ARMENIA CJSC", "2026-07-08", "CONFIRMADO", 210.0, -33, "ID", "ASIA", 0, "EXPO"], [62966, 2, "KARAS", "TIERRAS DE ARMENIA CJSC", "2026-07-08", "CONFIRMADO", 210.0, -33, "ID", "ASIA", 0, "EXPO"], [62968, 1, "KING MIDAS", "SDTI - SOCIEDADE DESENVOLVIMENTO TECNOLOGIAS INOVADORAS, LDA", "2026-08-21", "CONFIRMADO", 2160.0, -77, "ID", "ASIA", 0, "EXPO"], [62968, 2, "KING MIDAS", "SDTI - SOCIEDADE DESENVOLVIMENTO TECNOLOGIAS INOVADORAS, LDA", "2026-08-21", "CONFIRMADO", 150.0, -77, "ID", "ASIA", 0, "EXPO"], [62969, 1, "BLUE RUN", "APB - MERCADERIA PARA STOCK EXPORTACION", "2026-06-22", "CONFIRMADO", 0.0, -17, "ID", "BEIRO", 0, "EXPO"], [62970, 1, "CORRAL DE PALOS", "APB - MERCADERIA PARA STOCK PROD ESPECIALES", "2026-08-29", "CONFIRMADO", 0.0, -85, "ID", "BEIRO", 0, "LOCAL"], [62971, 1, "CHIC DENIM", "COOPERATIVA DE TRABAJO PRANA LIMITADA", "2026-08-05", "CONFIRMADO", 2354.61, -61, "MODA", "BEIRO", 0, "LOCAL"], [62972, 1, "METTA", "COOPERATIVA DE TRABAJO PRANA LIMITADA", "2026-08-01", "CONFIRMADO", 2151.99, -57, "MODA", "BEIRO", 0, "LOCAL"], [62972, 2, "METTA", "COOPERATIVA DE TRABAJO PRANA LIMITADA", "2026-08-01", "CONFIRMADO", 1590.91, -57, "MODA", "BEIRO", 0, "LOCAL"], [62972, 3, "METTA", "COOPERATIVA DE TRABAJO PRANA LIMITADA", "2026-08-01", "CONFIRMADO", 2151.99, -57, "MODA", "BEIRO", 0, "LOCAL"], [62972, 4, "METTA", "COOPERATIVA DE TRABAJO PRANA LIMITADA", "2026-08-01", "CONFIRMADO", 1590.91, -57, "MODA", "BEIRO", 0, "LOCAL"], [62973, 1, "TANNERY", "INDUS. ARG. DE LA INDUMENTARIA S.A.", "2026-08-20", "CONFIRMADO", 5794.74, -76, "MODA", "BEIRO", 0, "LOCAL"], [62974, 1, "PAUL SUTTON BOURBON", "1185 LLC", "2026-07-20", "CONFIRMADO", 365.0, -45, "ID", "ASIA", 0, "EXPO"], [62974, 2, "PAUL SUTTON BOURBON", "1185 LLC", "2026-07-20", "CONFIRMADO", 0.0, -45, "ID", "ASIA", 0, "EXPO"], [62975, 1, "TIZA JEANS", "SCHINCA NORBERTO", "2026-08-14", "CONFIRMADO", 2002.84, -70, "MODA", "BEIRO", 0, "LOCAL"], [62975, 2, "TIZA JEANS", "SCHINCA NORBERTO", "2026-08-14", "CONFIRMADO", 1214.49, -70, "MODA", "BEIRO", 0, "LOCAL"], [62976, 1, "KING OF THE KONGO", "UMAVAMA S.R.L", "2026-08-10", "CONFIRMADO", 8373.07, -66, "MODA", "BEIRO", 0, "LOCAL"], [62977, 1, "HERENCIA ARGENTINA", "KOWZEF S.A.", "2026-06-26", "CONFIRMADO", 241.23, -21, "MODA", "BEIRO", 0, "LOCAL"], [62978, 1, "LOVELY DENIM", "LOVE IN S.A.", "2026-08-30", "CONFIRMADO", 4414.86, -86, "MODA", "BEIRO", 0, "LOCAL"], [62979, 1, "MILLIE", "LANCOTT  S.R.L.", "2026-06-30", "CONFIRMADO", 218.64, -25, "MODA", "BEIRO", 0, "LOCAL"], [62980, 1, "DON MICHAEL", "TAPI SOUTH AMERICA S.A.", "2026-07-08", "CONFIRMADO", 1160.0, -33, "ID", "BEIRO", 0, "LOCAL"], [62983, 1, "STETSON", "APB - MERCADERIA PARA STOCK EXPORTACION", "2026-08-08", "CONFIRMADO", 0.0, -64, "ID", "BEIRO", 0, "EXPO"], [62984, 1, "THE MAVEN", "APB - MERCADERIA PARA STOCK EXPORTACION", "2026-08-08", "CONFIRMADO", 0.0, -64, "ID", "BEIRO", 0, "EXPO"], [62985, 1, "THE LAST ONE HUNDRED", "APB - MERCADERIA PARA STOCK EXPORTACION", "2026-08-08", "CONFIRMADO", 0.0, -64, "ID", "BEIRO", 0, "EXPO"], [62985, 2, "THE LAST ONE HUNDRED", "APB - MERCADERIA PARA STOCK EXPORTACION", "2026-08-08", "CONFIRMADO", 0.0, -64, "ID", "BEIRO", 0, "EXPO"], [62986, 1, "WILLAMETTE", "APB - MERCADERIA PARA STOCK EXPORTACION", "2026-08-08", "CONFIRMADO", 0.0, -64, "ID", "BEIRO", 0, "EXPO"], [62987, 1, "MERUS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2026-08-08", "CONFIRMADO", 0.0, -64, "ID", "BEIRO", 0, "EXPO"], [62988, 1, "SEPPELTSFIELD ROAD DISTILLERS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2026-08-08", "CONFIRMADO", 0.0, -64, "ID", "ASIA", 0, "EXPO"], [62988, 2, "SEPPELTSFIELD ROAD DISTILLERS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2026-08-08", "CONFIRMADO", 0.0, -64, "ID", "ASIA", 0, "EXPO"], [62167, 1, "BLUE RUN", "TRIBECA  IMP-EXP, INC", "2025-11-14", "CONFIRMADO", 0.0, 203, "ID", "BEIRO", 0, "EXPO"], [62167, 2, "BLUE RUN", "TRIBECA  IMP-EXP, INC", "2025-11-14", "CONFIRMADO", 0.0, 203, "ID", "BEIRO", 0, "EXPO"], [62514, 1, "STATURE", "TRIBECA  IMP-EXP, INC", "2026-04-08", "CONFIRMADO", 2950.0, 58, "ID", "BEIRO", 5000, "EXPO"], [62514, 2, "STATURE", "TRIBECA  IMP-EXP, INC", "2026-04-08", "CONFIRMADO", 2950.0, 58, "ID", "BEIRO", 5000, "EXPO"], [62539, 1, "RIP CURL", "CRISTOBAL COLON S.R.L.", "2026-05-10", "CONFIRMADO", 1458.19, 26, "MODA", "BEIRO", 0, "LOCAL"], [62539, 2, "RIP CURL", "CRISTOBAL COLON S.R.L.", "2026-05-10", "CONFIRMADO", 3192.81, 26, "MODA", "BEIRO", 0, "LOCAL"], [62580, 1, "CASAZAR", "BRANDON PACKAGING", "2026-05-08", "CONFIRMADO", 5325.0, 28, "ID", "ASIA", 0, "EXPO"], [62580, 2, "CASAZAR", "BRANDON PACKAGING", "2026-05-08", "CONFIRMADO", 3195.0, 28, "ID", "ASIA", 0, "EXPO"], [62580, 3, "CASAZAR", "BRANDON PACKAGING", "2026-05-08", "CONFIRMADO", 2130.0, 28, "ID", "ASIA", 0, "EXPO"], [62585, 1, "LOCO", "BRANDON PACKAGING", "2026-03-06", "CONFIRMADO", 0.0, 91, "ID", "BEIRO", 0, "EXPO"], [62678, 1, "REDEMPTION", "LIONBERT LLC", "2026-06-04", "CONFIRMADO", 4100.0, 1, "ID", "BEIRO", 0, "EXPO"], [62709, 1, "NOHACA", "BRANDON PACKAGING", "2026-04-08", "CONFIRMADO", 3234.0, 58, "ID", "BEIRO", 0, "EXPO"], [62709, 2, "NOHACA", "BRANDON PACKAGING", "2026-04-08", "CONFIRMADO", 3234.0, 58, "ID", "BEIRO", 0, "EXPO"], [62709, 3, "NOHACA", "BRANDON PACKAGING", "2026-04-13", "CONFIRMADO", 882.0, 53, "ID", "BEIRO", 0, "EXPO"], [62751, 1, "BELLA UNION", "LIONBERT LLC", "2026-06-22", "CONFIRMADO", 13725.0, -17, "ID", "BEIRO", 0, "EXPO"], [62799, 1, "KIA", "KIA ARGENTINA S.A.", "2026-05-29", "CONFIRMADO", 2850.0, 7, "ID", "BEIRO", 0, "LOCAL"], [62807, 1, "UKIYO", "DRINKSOLOGY LIMITED", "2026-07-10", "CONFIRMADO", 40470.0, -35, "ID", "ASIA", 0, "EXPO"], [62807, 2, "UKIYO", "DRINKSOLOGY LIMITED", "2026-07-10", "CONFIRMADO", 2130.0, -35, "ID", "ASIA", 0, "EXPO"], [62836, 1, "SILVERBACK DISTILLLERY", "CHRISTINE RIGGLEMAN", "2026-07-28", "CONFIRMADO", 6040.0, -53, "ID", "BEIRO", 0, "EXPO"], [62937, 1, "SANTA", "PPHK CORPORARTION LTD", "2026-06-25", "CONFIRMADO", 2360.0, -20, "ID", "ASIA", 0, "EXPO"], [62942, 1, "BLUE RUN", "BLUE RUN SPIRITS", "2026-07-02", "CONFIRMADO", 1482.0, -27, "ID", "BEIRO", 0, "EXPO"], [62950, 1, "TREEHOUSE", "NIMBLEJACK PARTNERS, LLC", "2026-08-21", "CONFIRMADO", 15700.0, -77, "ID", "BEIRO", 0, "EXPO"], [62958, 1, "BLUE RUN", "BLUE RUN SPIRITS", "2026-07-20", "CONFIRMADO", 780.0, -45, "ID", "BEIRO", 0, "EXPO"], [62958, 2, "BLUE RUN", "BLUE RUN SPIRITS", "2026-07-20", "CONFIRMADO", 780.0, -45, "ID", "BEIRO", 0, "EXPO"], [62959, 1, "COPPERWORKS", "BIG DERBY DISTILLING COMPANY DBA COPPERWORKS DISTILLING COMPANY", "2026-08-06", "CONFIRMADO", 4500.0, -62, "ID", "ASIA", 0, "EXPO"], [61523, 6, "APHOLOS", "APB - MERCADERIA PARA STOCK EXPORTACION", "2025-07-24", "CONFIRMADO", 0.0, 316, "ID", "BEIRO", 0, "EXPO"], [62778, 1, "LAS PEPAS", "DO\u00d1A RAMONA S.A.", "2026-05-30", "CONFIRMADO", 2486.49, 6, "MODA", "BEIRO", 0, "LOCAL"], [62778, 2, "LAS PEPAS", "DO\u00d1A RAMONA S.A.", "2026-06-06", "CONFIRMADO", 4014.41, -1, "MODA", "BEIRO", 0, "LOCAL"], [62787, 2, "NINA", "BODEGAS SAN HUBERTO S.A.", "2026-06-15", "ASIGNADO", 5200.0, -10, "ID", "BEIRO", 20000, "LOCAL"], [62787, 3, "NINA", "BODEGAS SAN HUBERTO S.A.", "2026-07-15", "ASIGNADO", 5200.0, -40, "ID", "BEIRO", 9600, "LOCAL"], [62797, 1, "TAPI", "TAPI SOUTH AMERICA S.A.", "2026-05-21", "CONFIRMADO", 580.0, 15, "ID", "BEIRO", 0, "LOCAL"], [62801, 1, "BECKSTOFFER", "BPCP WINE CO.", "2026-07-09", "CONFIRMADO", 12600.0, -34, "ID", "BEIRO", 0, "EXPO"], [62801, 2, "BECKSTOFFER", "BPCP WINE CO.", "2026-07-09", "CONFIRMADO", 12600.0, -34, "ID", "BEIRO", 0, "EXPO"], [62802, 1, "EURO", "MJSL INSUMOS TEXTILES S.R.L", "2026-07-20", "CONFIRMADO", 1410.0, -45, "MODA", "BEIRO", 1700, "EXPO"], [62802, 2, "EURO", "MJSL INSUMOS TEXTILES S.R.L", "2026-07-20", "CONFIRMADO", 25.0, -45, "MODA", "BEIRO", 1, "EXPO"], [62802, 3, "EURO", "MJSL INSUMOS TEXTILES S.R.L", "2026-07-20", "CONFIRMADO", 870.0, -45, "MODA", "BEIRO", 0, "EXPO"], [62811, 1, "GNA", "PROVEEDURIA G.N.A. SRL", "2026-06-01", "CONFIRMADO", 3528.77, 4, "MODA", "BEIRO", 0, "LOCAL"], [62819, 1, "LOVELY DENIM", "LOVE IN S.A.", "2026-06-12", "CONFIRMADO", 13522.36, -7, "MODA", "BEIRO", 0, "LOCAL"], [62819, 2, "LOVELY DENIM", "LOVE IN S.A.", "2026-06-12", "CONFIRMADO", 4580.15, -7, "MODA", "BEIRO", 0, "LOCAL"], [62821, 1, "UKIYO", "DRINKSOLOGY LIMITED", "2026-06-15", "CONFIRMADO", 66500.0, -10, "ID", "ASIA", 0, "EXPO"], [62821, 2, "UKIYO", "DRINKSOLOGY LIMITED", "2026-06-15", "CONFIRMADO", 3500.0, -10, "ID", "ASIA", 0, "EXPO"], [62831, 1, "PATRIMONY", "TRIBECA  IMP-EXP, INC", "2026-07-10", "CONFIRMADO", 3094.0, -35, "ID", "BEIRO", 0, "EXPO"], [62831, 2, "PATRIMONY", "TRIBECA  IMP-EXP, INC", "2026-07-10", "CONFIRMADO", 2430.0, -35, "ID", "BEIRO", 0, "EXPO"], [62837, 1, "QUARA", "ULY SASU", "2026-06-02", "CONFIRMADO", 1470.0, 3, "ID", "BEIRO", 580, "LOCAL"], [62837, 2, "QUARA", "ULY SASU", "2026-12-06", "CONFIRMADO", 2310.0, -184, "ID", "BEIRO", 0, "LOCAL"], [62883, 1, "THE MAVEN", "IJW WHISKEY CO LLC", "2026-07-10", "CONFIRMADO", 55920.0, -35, "ID", "BEIRO", 0, "EXPO"], [62905, 1, "TAPI", "TAPI SOUTH AMERICA S.A.", "2026-06-23", "CONFIRMADO", 6240.0, -18, "ID", "BEIRO", 0, "LOCAL"], [62907, 1, "TIERRA DE ASADORES", "VINO TOURISM ARGENTINA SRL", "2026-06-26", "CONFIRMADO", 1650.0, -21, "ID", "BEIRO", 0, "LOCAL"], [62914, 1, "RAZA ARGENTINA", "LA RIOJANA COOP.  VITV.  DE LA RIOJA", "2026-07-02", "CONFIRMADO", 7500.0, -27, "ID", "BEIRO", 0, "LOCAL"], [62916, 1, "WILLAMETTE", "TRIBECA  IMP-EXP, INC", "2026-08-07", "CONFIRMADO", 2900.0, -63, "ID", "BEIRO", 0, "EXPO"], [62916, 2, "WILLAMETTE", "TRIBECA  IMP-EXP, INC", "2026-08-07", "CONFIRMADO", 300.0, -63, "ID", "BEIRO", 0, "EXPO"], [62943, 1, "BODEGA DEL FIN DEL MUNDO", "BDFM S.A", "2026-07-15", "CONFIRMADO", 8200.0, -40, "ID", "BEIRO", 0, "LOCAL"], [62943, 2, "BODEGA DEL FIN DEL MUNDO", "BDFM S.A", "2026-09-01", "CONFIRMADO", 8200.0, -88, "ID", "BEIRO", 0, "LOCAL"], [62955, 1, "POPLAR GROVE", "POPLAR GROVE WINERY", "2026-08-06", "CONFIRMADO", 1794.0, -62, "ID", "BEIRO", 0, "EXPO"], [61850, 1, "LA PULGA", "APHOLOS ACCES. MEXICO  S.A. DE  C.V.", "2025-09-05", "CONFIRMADO", 0.0, 273, "MODA", "BEIRO", 0, "EXPO"]]</script>
+<script type="application/json" id="d-asig">[["62549/1", "BROOKSFIELD", "URBAN AFFAIRS S.A.", 5000, 1709.84, "CUMPLIDO", "08:01", "Camila Ca\u00f1ete", "LOCAL", "CUMPLE", "MODA", "BEIRO", 0], ["62917/3", "VERONICA BEARD", "HAITAN HB (H.K.) LTD", 7600, 326.8, "CUMPLIDO", "10:21", "Marcia Pintos", "EXPO", "CUMPLE", "MODA", "ASIA", 0], ["59124/7", "\u2014", "\u2014", 106, 0, "\u2014", "10:08", "Marcia Pintos", "LOCAL", "PARCIAL", "", "", 0], ["62917/2", "VERONICA BEARD", "HAITAN HB (H.K.) LTD", 3600, 288.0, "CUMPLIDO", "10:21", "Marcia Pintos", "EXPO", "CUMPLE", "MODA", "ASIA", 0], ["62932/1", "VERONICA BEARD", "PIPES & SHAW LLC", 40000, 1720.0, "CUMPLIDO", "10:28", "Marcia Pintos", "EXPO", "CUMPLE", "MODA", "ASIA", 0], ["62845/1", "MAGIAMORE", "MONTECAPRI LIMITED", 5280, 5500.0, "CONFIRMADO", "11:52", "Hugo Ant\u00fanez", "EXPO", "PARCIAL", "ID", "BEIRO", 13920], ["62912/1", "VERONICA BEARD", "PIPES & SHAW LLC", 5000, 0.0, "CUMPLIDO", "10:25", "Marcia Pintos", "EXPO", "CUMPLE", "MODA", "ASIA", 0], ["62917/4", "VERONICA BEARD", "HAITAN HB (H.K.) LTD", 14500, 623.5, "CUMPLIDO", "10:22", "Marcia Pintos", "EXPO", "CUMPLE", "MODA", "ASIA", 0], ["62420/3", "VIGA", "AZALEE S.A.", 5000, 926.87, "CUMPLIDO", "11:50", "Camila Ca\u00f1ete", "LOCAL", "CUMPLE", "MODA", "BEIRO", 0], ["62981/1", "LAKELAND", "LAKELAND ARGENTINA SRL", 15000, 494.04, "CUMPLIDO", "06:08", "Marcia Pintos", "LOCAL", "CUMPLE", "MODA", "BEIRO", 0], ["62655/5", "OLD BRIDGE", "GRUPO LEGAR S.R.L.", 2500, 780.03, "CUMPLIDO", "13:13", "Camila Ca\u00f1ete", "LOCAL", "CUMPLE", "MODA", "BEIRO", 0], ["62917/1", "VERONICA BEARD", "HAITAN HB (H.K.) LTD", 1900, 152.0, "CUMPLIDO", "10:20", "Marcia Pintos", "EXPO", "CUMPLE", "MODA", "ASIA", 0], ["62588/1", "VOLCANO", "SILPEN ST DOOEL KRATOVO", 200, 11375.0, "ENVIADO", "08:48", "Marcia Pintos", "EXPO", "PARCIAL", "ID", "BEIRO", 200], ["62953/2", "PROMATEX", "INDUMENTARIA PROMATEX SOCIEDAD DE RESPONSABILIDAD LIMITADA", 1, 49.44, "CUMPLIDO", "09:24", "Camila Ca\u00f1ete", "LOCAL", "CUMPLE", "MODA", "BEIRO", 0], ["62779/1", "TIM-BO GIN", "CARCELLER INGENIER\u00cdA Y MECANIZADOS SRL", 1056, 710.0, "CUMPLIDO", "06:17", "Marcia Pintos", "LOCAL", "CUMPLE", "ID", "BEIRO", 0], ["62572/1", "GOODY", "FAMILIA DE EMPRENDEDORES SA", 5000, 4764.29, "CUMPLIDO", "08:51", "Camila Ca\u00f1ete", "LOCAL", "CUMPLE", "MODA", "BEIRO", 0]]</script>
+
+<div class="topbar">
+  <span class="logo-main">Apholos</span><span class="logo-sep"></span><span class="logo-sub">Metal Identity</span>
+  <div class="tsep"></div>
+  <span class="page-title">Deuda de F&aacute;brica</span>
+  <div class="topbar-right">
+    <span class="upstatus" id="upload-status"></span>
+    <label class="upbtn">&#8593; Cargar archivo<input type="file" accept=".xls,.xlsx,.csv" multiple onchange="loadFiles(this)"></label>
+  </div>
+</div>
+
+<div class="layout">
+<aside class="sidebar">
+  <div class="sb-section">
+    <div class="sb-title">Categor&iacute;a</div>
+    <button class="sb-opt active" onclick="setF('cat','',this)"><span class="sb-dot" style="background:var(--text)"></span>Todas<span class="sb-count" id="sc0"></span></button>
+    <button class="sb-opt" onclick="setF('cat','MODA',this)"><span class="sb-dot" style="background:var(--blue)"></span>Moda<span class="sb-count" id="sc1"></span></button>
+    <button class="sb-opt" onclick="setF('cat','ID',this)"><span class="sb-dot" style="background:var(--red)"></span>ID<span class="sb-count" id="sc2"></span></button>
+  </div>
+  <div class="sb-section">
+    <div class="sb-title">Origen</div>
+    <button class="sb-opt active" onclick="setF('orig','',this)"><span class="sb-dot" style="background:var(--text)"></span>Todos<span class="sb-count" id="sc3"></span></button>
+    <button class="sb-opt" onclick="setF('orig','BEIRO',this)"><span class="sb-dot" style="background:var(--amber)"></span>Beiro<span class="sb-count" id="sc4"></span></button>
+    <button class="sb-opt" onclick="setF('orig','ASIA',this)"><span class="sb-dot" style="background:var(--green)"></span>Asia<span class="sb-count" id="sc5"></span></button>
+  </div>
+  <div class="sb-section">
+    <div class="sb-title">Mercado</div>
+    <button class="sb-opt active" onclick="setF('merc','',this)"><span class="sb-dot" style="background:var(--text)"></span>Todos<span class="sb-count" id="sc6"></span></button>
+    <button class="sb-opt" onclick="setF('merc','LOCAL',this)"><span class="sb-dot" style="background:var(--purple)"></span>Local<span class="sb-count" id="sc7"></span></button>
+    <button class="sb-opt" onclick="setF('merc','EXPO',this)"><span class="sb-dot" style="background:var(--teal)"></span>Expo<span class="sb-count" id="sc8"></span></button>
+  </div>
+  <div class="sb-section">
+    <div class="sb-title">Actualizar datos</div>
+    <label class="up-area">
+      <input type="file" accept=".xls,.xlsx,.csv" multiple onchange="loadFiles(this)">
+      <div style="font-size:1.1rem;margin-bottom:.25rem">&#128194;</div>
+      <div class="up-area-txt"><b>Cargar archivo</b>Deuda o asignados</div>
+      <div class="up-msg" id="up-msg-side"></div>
+    </label>
+  </div>
+</aside>
+
+<div class="content">
+  <div class="tabs">
+    <button class="tab active" id="tab-resumen" onclick="showPage('resumen',this)">Resumen</button>
+    <button class="tab" id="tab-vencidos" onclick="showPage('vencidos',this)">Vencidos</button>
+    <button class="tab" id="tab-proximos" onclick="showPage('proximos',this)">Pr&oacute;ximos 30 d&iacute;as</button>
+    <button class="tab" id="tab-todos" onclick="showPage('todos',this)">Todos los pedidos</button>
+    <button class="tab" id="tab-asig" onclick="showPage('asig',this)">Asignados hoy</button>
+  </div>
+  <div class="ci">
+
+    <div class="page active" id="page-resumen">
+      <div class="res-block1" id="res-block1"></div><div class="res-block2" id="res-block2"></div>
+      <div class="res-splits" id="res-splits"></div>
+      <div class="res-panels">
+        <div class="panel"><div class="ph">Urgencia por fecha target</div><div class="pb" id="urgencia-rows"></div></div>
+        <div class="panel"><div class="ph">Top 10 marcas</div><div class="pb" id="top-marcas"></div></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-vencidos">
+      <div class="ts">
+        <div class="tt">
+          <input class="sb" id="sv" placeholder="Buscar pedido, marca, cliente..." oninput="renderT('vencidos')">
+          <select class="sl" id="fev" onchange="renderT('vencidos')"><option value="">Todos los estados</option><option>CONFIRMADO</option><option>EN PRODUCCI&Oacute;N</option><option>BLOQUEADO</option></select>
+        </div>
+        <div class="tw"><table><thead><tr>
+          <th onclick="sortT('vencidos','pedido')">Pedido</th><th onclick="sortT('vencidos','marca')">Marca</th><th onclick="sortT('vencidos','cliente')">Cliente</th>
+          <th class="r" onclick="sortT('vencidos','fecha')">Target</th><th class="r" onclick="sortT('vencidos','dias')">Atraso</th>
+          <th onclick="sortT('vencidos','estado')">Estado</th><th onclick="sortT('vencidos','cat')">Cat.</th>
+          <th onclick="sortT('vencidos','orig')">Origen</th><th onclick="sortT('vencidos','merc')">Mercado</th>
+          <th class="r" onclick="sortT('vencidos','usd')">USD</th>
+        </tr></thead><tbody id="tb-vencidos"></tbody></table></div>
+        <div class="tf"><span id="fc-vencidos"></span><span id="ft-vencidos"></span></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-proximos">
+      <div class="ts">
+        <div class="tt">
+          <input class="sb" id="sp" placeholder="Buscar pedido, marca, cliente..." oninput="renderT('proximos')">
+          <select class="sl" id="fep" onchange="renderT('proximos')"><option value="">Todos los estados</option><option>CONFIRMADO</option><option>EN PRODUCCI&Oacute;N</option></select>
+        </div>
+        <div class="tw"><table><thead><tr>
+          <th onclick="sortT('proximos','pedido')">Pedido</th><th onclick="sortT('proximos','marca')">Marca</th><th onclick="sortT('proximos','cliente')">Cliente</th>
+          <th class="r" onclick="sortT('proximos','fecha')">Target</th><th class="r" onclick="sortT('proximos','dias')">D&iacute;as</th>
+          <th onclick="sortT('proximos','estado')">Estado</th><th onclick="sortT('proximos','cat')">Cat.</th>
+          <th onclick="sortT('proximos','orig')">Origen</th><th onclick="sortT('proximos','merc')">Mercado</th>
+          <th class="r" onclick="sortT('proximos','usd')">USD</th>
+        </tr></thead><tbody id="tb-proximos"></tbody></table></div>
+        <div class="tf"><span id="fc-proximos"></span><span id="ft-proximos"></span></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-todos">
+      <div class="ts">
+        <div class="tt">
+          <input class="sb" id="st" placeholder="Buscar pedido, marca, cliente..." oninput="renderT('todos')">
+          <select class="sl" id="fet" onchange="renderT('todos')"><option value="">Todos los estados</option><option>CONFIRMADO</option><option>EN PRODUCCI&Oacute;N</option><option>ASIGNADO</option><option>BLOQUEADO</option></select>
+          <select class="sl" id="fut" onchange="renderT('todos')"><option value="">Toda urgencia</option><option value="vencido">Vencido</option><option value="30d">Pr&oacute;x. 30 d&iacute;as</option><option value="60d">30-60 d&iacute;as</option><option value="90d">60-90 d&iacute;as</option><option value="mas">+90 d&iacute;as</option></select>
+        </div>
+        <div class="tw"><table><thead><tr>
+          <th onclick="sortT('todos','pedido')">Pedido</th><th onclick="sortT('todos','marca')">Marca</th><th onclick="sortT('todos','cliente')">Cliente</th>
+          <th class="r" onclick="sortT('todos','fecha')">Target</th><th class="r" onclick="sortT('todos','dias')">D&iacute;as</th>
+          <th onclick="sortT('todos','estado')">Estado</th><th onclick="sortT('todos','cat')">Cat.</th>
+          <th onclick="sortT('todos','orig')">Origen</th><th onclick="sortT('todos','merc')">Mercado</th>
+          <th class="r" onclick="sortT('todos','usd')">USD</th>
+        </tr></thead><tbody id="tb-todos"></tbody></table></div>
+        <div class="tf"><span id="fc-todos"></span><span id="ft-todos"></span></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-asig">
+      <div class="ak" id="asig-kpis"></div>
+      <div class="ts">
+        <div class="tt">
+          <input class="sb" id="sa" placeholder="Buscar pedido, marca, cliente..." oninput="renderAsig()">
+          <select class="sl" id="fma" onchange="renderAsig()"><option value="">Todos los mercados</option><option>LOCAL</option><option>EXPO</option></select>
+          <select class="sl" id="fea" onchange="renderAsig()"><option value="">Todos los estados</option><option>CUMPLIDO</option><option>CONFIRMADO</option><option>ENVIADO</option></select>
+        </div>
+        <div class="tw"><table><thead><tr>
+          <th onclick="sortA('pedido')">Pedido</th><th onclick="sortA('marca')">Marca</th><th onclick="sortA('cliente')">Cliente</th>
+          <th class="r" onclick="sortA('cant')">Cantidad</th><th onclick="sortA('tipo')">Tipo asig.</th>
+          <th onclick="sortA('asigprevia')">Asig. previa</th>
+          <th onclick="sortA('estado')">Estado pedido</th><th onclick="sortA('merc')">Mercado</th>
+          <th class="r" onclick="sortA('usd')">USD</th>
+        </tr></thead><tbody id="tb-asig"></tbody></table></div>
+        <div class="tf"><span id="fc-asig"></span><span id="ft-asig"></span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+var RAW  = JSON.parse(document.getElementById('d-raw').textContent);
+var ASIG = JSON.parse(document.getElementById('d-asig').textContent);
+
+var FAM = {"M":"MODA","MH":"ID","MH5":"ID","ID":"ID","ID5":"ID","IDA":"ID","I":"ID","LL":"ID","L":"ID","TC":"ID","TP":"ID","TPA":"ID","TR":"ID","BA":"MODA","RA":"MODA","BZ":"ID","CLL":"ID","CV":"ID","H":"ID","P":"ID","Q":"ID","R":"ID","S":"ID","Z":"ID","A":"ID","B":"ID","C":"MODA"};
+var ID_C = ["M-9410"];
+var EXPO = ["E","AR-E","ES","AR-ES","ME","AR-ME","RE","ES-","EP","AR-EP","AR-MEP","MEP","REP","ESP","AR-ESP","EXP","AR-EXP","MEXP","AR-MEXP","REXP","PSEXPO","AR-PSEXPO","ASE","ASEP","ASEXP","ASRE","ASRERP","ASREXP","AR-ASE","AR-ASEP","AR-ASEXP","ASME","AR-ASME"];
+var EXCLT = ["FI","PRES"];
+var ACTE = ["CONFIRMADO","EN PRODUCCI\u00d3N","ASIGNADO","CONFIRMADO POR EXPEDICI\u00d3N","A CONFIRMAR POR EXPEDICI\u00d3N","BLOQUEADO PRECIO NO AUTORIZADO","L\u00cdMITE DE CR\u00c9DITO EXCEDIDO"];
+var EXCLE = ["FACTURADO","A CANCELAR","ENVIADO","CUMPLIDO","CANCELADO","ANULADO"];
+
+var GF = {cat:'',orig:'',merc:''};
+var CP = 'resumen';
+var SS = {vencidos:{k:'dias',d:-1},proximos:{k:'dias',d:1},todos:{k:'dias',d:-1}};
+var SA = {k:'tipo',d:1};
+
+function fmt(n){return '$'+Math.round(n).toLocaleString('es-AR')}
+function urg(d){return d>0?'vencido':d>=-30?'30d':d>=-60?'60d':d>=-90?'90d':'mas'}
+function estB(e){
+  if(e.indexOf('PRODUCCI')>=0) return '<span class="bdg bp">Prod.</span>';
+  if(e.indexOf('BLOQUEADO')>=0||e.indexOf('CR\u00c9DITO')>=0||e.indexOf('CONFIRMAR')>=0) return '<span class="bdg bb">Bloq.</span>';
+  if(e==='ASIGNADO') return '<span class="bdg ba">Asig.</span>';
+  return '<span class="bdg bc">Conf.</span>';
+}
+function catB(c){return '<span class="bdg '+(c==='ID'?'ti':'tm')+'">'+c+'</span>'}
+function origB(o){return '<span class="bdg '+(o==='ASIA'?'tas':'tb2')+'">'+o+'</span>'}
+function mercB(m){return '<span class="bdg '+(m==='EXPO'?'te':'tl')+'">'+m+'</span>'}
+function diasC(d){
+  if(d>0){var c=d>=90?'dc':d>=30?'dh':'dl';return '<span class="db '+c+'">+'+d+'d</span>';}
+  return '<span class="db do">'+Math.abs(d)+'d</span>';
+}
+function applyGF(data){
+  return data.filter(function(r){
+    if(GF.cat  && r[8] !==GF.cat)  return false;
+    if(GF.orig && r[9] !==GF.orig) return false;
+    if(GF.merc && r[11]!==GF.merc) return false;
+    return true;
+  });
+}
+function setF(type,val,el){
+  GF[type]=val;
+  var btns=el.closest('.sb-section').querySelectorAll('.sb-opt');
+  for(var i=0;i<btns.length;i++) btns[i].classList.remove('active');
+  el.classList.add('active');
+  updateTabLabels();
+  refreshAll();
+}
+function updateTabLabels(){
+  var parts=[GF.cat,GF.orig,GF.merc].filter(Boolean);
+  var s=parts.length?' \u00b7 '+parts.join(' / '):'';
+  document.getElementById('tab-vencidos').textContent='Vencidos'+s;
+  document.getElementById('tab-proximos').textContent='Pr\u00f3ximos 30 d\u00edas'+s;
+  document.getElementById('tab-todos').textContent='Todos los pedidos'+s;
+}
+function updSB(){
+  var a=RAW;
+  document.getElementById('sc0').textContent=a.length;
+  document.getElementById('sc1').textContent=a.filter(function(r){return r[8]==='MODA'}).length;
+  document.getElementById('sc2').textContent=a.filter(function(r){return r[8]==='ID'}).length;
+  document.getElementById('sc3').textContent=a.length;
+  document.getElementById('sc4').textContent=a.filter(function(r){return r[9]==='BEIRO'}).length;
+  document.getElementById('sc5').textContent=a.filter(function(r){return r[9]==='ASIA'}).length;
+  document.getElementById('sc6').textContent=a.length;
+  document.getElementById('sc7').textContent=a.filter(function(r){return r[11]==='LOCAL'}).length;
+  document.getElementById('sc8').textContent=a.filter(function(r){return r[11]==='EXPO'}).length;
+}
+function buildResumen(){
+  var src=applyGF(RAW);
+  var total=src.reduce(function(s,r){return s+r[6]},0);
+  var exp  =src.filter(function(r){return r[10]>0}).reduce(function(s,r){return s+r[6]},0);
+  var pend =src.filter(function(r){return r[10]===0}).reduce(function(s,r){return s+r[6]},0);
+  var venc =src.filter(function(r){return r[7]>0}).reduce(function(s,r){return s+r[6]},0);
+  var d30  =src.filter(function(r){return r[7]<=0&&r[7]>=-30}).reduce(function(s,r){return s+r[6]},0);
+  var asigT=ASIG.reduce(function(s,r){return s+r[4]},0);
+  var asigC=ASIG.filter(function(r){return r[9]==='CUMPLE'}).length;
+  var asigP=ASIG.filter(function(r){return r[9]==='PARCIAL'}).length;
+  var moda =src.filter(function(r){return r[8]==='MODA'});
+  var id_  =src.filter(function(r){return r[8]==='ID'});
+  var beiro=src.filter(function(r){return r[9]==='BEIRO'});
+  var asia =src.filter(function(r){return r[9]==='ASIA'});
+  var local=src.filter(function(r){return r[11]==='LOCAL'});
+  var expo =src.filter(function(r){return r[11]==='EXPO'});
+  var sm=moda.reduce(function(s,r){return s+r[6]},0);
+  var si=id_.reduce(function(s,r){return s+r[6]},0);
+  var sb=beiro.reduce(function(s,r){return s+r[6]},0);
+  var sa_=asia.reduce(function(s,r){return s+r[6]},0);
+  var sl=local.reduce(function(s,r){return s+r[6]},0);
+  var se=expo.reduce(function(s,r){return s+r[6]},0);
+  var pct=function(v){return total>0?Math.round(v/total*100):0};
+
+  // Block 1: deuda principal
+  document.getElementById('res-block1').innerHTML=
+    '<div class="rc c0"><div class="rc-lbl">Deuda total de f\u00e1brica</div><div class="rc-val">'+fmt(total)+'</div><div class="rc-sub">'+src.length+' \u00edtems activos</div></div>'+
+    '<div class="rc c1"><div class="rc-lbl">En expedici\u00f3n</div><div class="rc-val">'+fmt(exp)+'</div><div class="rc-sub">'+src.filter(function(r){return r[10]>0}).length+' \u00edtems \u00b7 asignados sin entregar</div></div>'+
+    '<div class="rc c2"><div class="rc-lbl">Pendiente f\u00e1brica</div><div class="rc-val">'+fmt(pend)+'</div><div class="rc-sub">'+src.filter(function(r){return r[10]===0}).length+' \u00edtems \u00b7 sin asignar</div></div>';
+  // Block 2: tiempos
+  document.getElementById('res-block2').innerHTML=
+    '<div class="rc c3"><div class="rc-lbl">Vencidos</div><div class="rc-val">'+fmt(venc)+'</div><div class="rc-sub">'+src.filter(function(r){return r[7]>0}).length+' \u00edtems</div></div>'+
+    '<div class="rc c4"><div class="rc-lbl">Pr\u00f3ximos 30 d\u00edas</div><div class="rc-val">'+fmt(d30)+'</div><div class="rc-sub">'+src.filter(function(r){return r[7]<=0&&r[7]>=-30}).length+' \u00edtems</div></div>'+
+    '<div class="rc c5"><div class="rc-lbl">Asignado hoy</div><div class="rc-val">'+fmt(asigT)+'</div><div class="rc-sub">'+asigC+' cumplen \u00b7 '+asigP+' parciales</div></div>';
+
+  // Splits
+  document.getElementById('res-splits').innerHTML=
+    '<div class="rsb"><div class="rsb-lbl">Categor\u00eda</div><div class="rsb-inner">'+
+      '<div class="rm m0"><div class="rm-lbl">Moda</div><div class="rm-val">'+fmt(sm)+'</div><div class="rm-sub">'+moda.length+' items \u00b7 '+pct(sm)+'%</div></div>'+
+      '<div class="rm m1"><div class="rm-lbl">ID</div><div class="rm-val">'+fmt(si)+'</div><div class="rm-sub">'+id_.length+' items \u00b7 '+pct(si)+'%</div></div>'+
+    '</div></div>'+
+    '<div class="rsb"><div class="rsb-lbl">Origen</div><div class="rsb-inner">'+
+      '<div class="rm m2"><div class="rm-lbl">Beiro</div><div class="rm-val">'+fmt(sb)+'</div><div class="rm-sub">'+beiro.length+' items \u00b7 '+pct(sb)+'%</div></div>'+
+      '<div class="rm m3"><div class="rm-lbl">Asia</div><div class="rm-val">'+fmt(sa_)+'</div><div class="rm-sub">'+asia.length+' items \u00b7 '+pct(sa_)+'%</div></div>'+
+    '</div></div>'+
+    '<div class="rsb"><div class="rsb-lbl">Mercado</div><div class="rsb-inner">'+
+      '<div class="rm m4"><div class="rm-lbl">Local</div><div class="rm-val">'+fmt(sl)+'</div><div class="rm-sub">'+local.length+' items \u00b7 '+pct(sl)+'%</div></div>'+
+      '<div class="rm m5"><div class="rm-lbl">Expo</div><div class="rm-val">'+fmt(se)+'</div><div class="rm-sub">'+expo.length+' items \u00b7 '+pct(se)+'%</div></div>'+
+    '</div></div>';
+
+  // Urgencia
+  var bkts=[
+    {l:'Vencido',c:'var(--red)',f:function(r){return r[7]>0}},
+    {l:'Pr\u00f3ximos 30 d\u00edas',c:'var(--amber)',f:function(r){return r[7]<=0&&r[7]>=-30}},
+    {l:'30-60 d\u00edas',c:'var(--blue)',f:function(r){return r[7]<-30&&r[7]>=-60}},
+    {l:'60-90 d\u00edas',c:'var(--green)',f:function(r){return r[7]<-60&&r[7]>=-90}},
+    {l:'+90 d\u00edas',c:'var(--muted)',f:function(r){return r[7]<-90}},
+  ];
+  var maxU=Math.max.apply(null,bkts.map(function(b){return src.filter(b.f).reduce(function(s,r){return s+r[6]},0)}));
+  if(maxU<=0) maxU=1;
+  document.getElementById('urgencia-rows').innerHTML=bkts.map(function(b){
+    var it=src.filter(b.f),u=it.reduce(function(s,r){return s+r[6]},0);
+    return '<div class="ri"><div class="dot" style="background:'+b.c+'"></div><div class="rn">'+b.l+'</div><div class="rc2">'+it.length+'</div><div class="rbw"><div class="rb" style="width:'+Math.round(u/maxU*100)+'%;background:'+b.c+'"></div></div><div class="ru">'+fmt(u)+'</div></div>';
+  }).join('');
+
+  // Top 10 marcas
+  var mm={};
+  src.forEach(function(r){var k=r[2]||'-';if(!mm[k])mm[k]={u:0,c:r[8]};mm[k].u+=r[6];});
+  var sm2=Object.keys(mm).map(function(k){return [k,mm[k]]}).sort(function(a,b){return b[1].u-a[1].u}).slice(0,10);
+  var mc=sm2.length?sm2[0][1].u:1;
+  document.getElementById('top-marcas').innerHTML=sm2.map(function(kv,i){
+    return '<div class="cr"><div class="ck">'+(i+1)+'</div><div class="cn">'+kv[0]+'</div><div style="flex-shrink:0;margin:0 .4rem">'+catB(kv[1].c)+'</div><div class="cbw"><div class="cb" style="width:'+Math.round(kv[1].u/mc*100)+'%"></div></div><div class="cu">'+fmt(kv[1].u)+'</div></div>';
+  }).join('');
+}
+
+function renderT(view){
+  var sMap={vencidos:'sv',proximos:'sp',todos:'st'};
+  var eMap={vencidos:'fev',proximos:'fep',todos:'fet'};
+  var q=document.getElementById(sMap[view]).value.toLowerCase();
+  var est=document.getElementById(eMap[view]).value;
+  var urgf=view==='todos'?document.getElementById('fut').value:'';
+  var src=applyGF(RAW);
+  if(view==='vencidos') src=src.filter(function(r){return r[7]>0});
+  if(view==='proximos') src=src.filter(function(r){return r[7]<=0&&r[7]>=-30});
+  src=src.filter(function(r){
+    if(q&&String(r[0]).indexOf(q)<0&&r[2].toLowerCase().indexOf(q)<0&&r[3].toLowerCase().indexOf(q)<0) return false;
+    if(est&&r[5].indexOf(est)<0) return false;
+    if(urgf&&urg(r[7])!==urgf) return false;
+    return true;
+  });
+  var km={pedido:0,marca:2,cliente:3,fecha:4,estado:5,usd:6,dias:7,cat:8,orig:9,merc:11};
+  var k=SS[view].k,d=SS[view].d;
+  src.sort(function(a,b){var va=a[km[k]],vb=b[km[k]];return va<vb?d:va>vb?-d:0;});
+  var total=src.reduce(function(s,r){return s+r[6]},0);
+  document.getElementById('tb-'+view).innerHTML=src.map(function(r){
+    return '<tr><td class="m">'+r[0]+'-'+r[1]+'</td><td>'+r[2]+'</td><td class="w">'+r[3]+'</td>'+
+      '<td class="r m">'+(r[4]?r[4].split('-').reverse().join('/'):'')+'</td><td class="r">'+diasC(r[7])+'</td><td>'+estB(r[5])+'</td>'+
+      '<td>'+catB(r[8])+'</td><td>'+origB(r[9])+'</td><td>'+mercB(r[11])+'</td>'+
+      '<td class="r m">'+fmt(r[6])+'</td></tr>';
+  }).join('');
+  document.getElementById('fc-'+view).innerHTML='<b>'+src.length+'</b> \u00edtems';
+  document.getElementById('ft-'+view).innerHTML='Total: <b>'+fmt(total)+'</b>';
+  var keys=['pedido','marca','cliente','fecha','dias','estado','cat','orig','merc','usd'];
+  var idx=keys.indexOf(k);
+  var ths=document.querySelectorAll('#page-'+view+' thead th');
+  for(var i=0;i<ths.length;i++) ths[i].classList.remove('sa','sd');
+  if(idx>=0&&ths[idx]) ths[idx].classList.add(d===-1?'sd':'sa');
+}
+function sortT(view,key){
+  if(SS[view].k===key)SS[view].d*=-1;else{SS[view].k=key;SS[view].d=(key==='usd'||key==='dias')?-1:1;}
+  renderT(view);
+}
+function renderAsig(){
+  var q=document.getElementById('sa').value.toLowerCase();
+  var merc=document.getElementById('fma').value;
+  var est=document.getElementById('fea').value;
+  var src=ASIG.filter(function(r){
+    if(q&&r[0].toLowerCase().indexOf(q)<0&&r[1].toLowerCase().indexOf(q)<0&&r[2].toLowerCase().indexOf(q)<0) return false;
+    if(merc&&r[8]!==merc) return false;
+    if(est&&r[5].indexOf(est)<0) return false;
+    // Global filters: cat (index 10=cat), orig (11=orig), merc already handled
+    if(GF.cat&&r[10]!==GF.cat) return false;
+    if(GF.orig&&r[11]!==GF.orig) return false;
+    return true;
+  });
+  var km={pedido:0,marca:1,cliente:2,cant:3,usd:4,estado:5,hora:6,usuario:7,merc:8,tipo:9,asigprevia:12};
+  src.sort(function(a,b){var va=a[km[SA.k]],vb=b[km[SA.k]];return va<vb?SA.d:va>vb?-SA.d:0;});
+  var total=src.reduce(function(s,r){return s+r[4]},0);
+  document.getElementById('tb-asig').innerHTML=src.map(function(r){
+    var tb=r[9]==='CUMPLE'?'<span class="bdg tcm">\u2713 Cumple</span>':'<span class="bdg tpa">\u007e Parcial</span>';
+    var eb=r[5]==='CUMPLIDO'?'<span class="bdg tcu">Cumplido</span>':r[5]==='ENVIADO'?'<span class="bdg tenv">Enviado</span>':estB(r[5]);
+    return '<tr><td class="m">'+r[0]+'</td><td>'+r[1]+'</td><td class="w">'+r[2]+'</td>'+
+      '<td class="r m">'+Number(r[3]).toLocaleString('es-AR')+'</td><td>'+tb+'</td>'+
+      '<td>'+(r[12]>0?'<span class="bdg" style="background:#fff8e6;color:#b7670a">+'+Number(r[12]).toLocaleString('es-AR')+' prev.</span>':'<span style="color:var(--muted2);font-size:.72rem">—</span>')+'</td>'+
+      '<td>'+eb+'</td>'+
+      '<td>'+mercB(r[8])+'</td>'+
+      '<td class="r m">'+fmt(r[4])+'</td></tr>';
+  }).join('');
+  document.getElementById('fc-asig').innerHTML='<b>'+src.length+'</b> pedidos';
+  document.getElementById('ft-asig').innerHTML='Total: <b>'+fmt(total)+'</b>';
+}
+function sortA(key){
+  if(SA.k===key)SA.d*=-1;else{SA.k=key;SA.d=(key==='usd'||key==='cant')?-1:1;}
+  renderAsig();
+}
+function buildAsigKPIs(){
+  var src=ASIG.filter(function(r){
+    if(GF.cat&&r[10]!==GF.cat) return false;
+    if(GF.orig&&r[11]!==GF.orig) return false;
+    return true;
+  });
+  var total=src.reduce(function(s,r){return s+r[4]},0);
+  var local=src.filter(function(r){return r[8]==='LOCAL'}).reduce(function(s,r){return s+r[4]},0);
+  var expo=src.filter(function(r){return r[8]==='EXPO'}).reduce(function(s,r){return s+r[4]},0);
+  var cumpl=src.filter(function(r){return r[9]==='CUMPLE'}).length;
+  var parcial=src.filter(function(r){return r[9]==='PARCIAL'}).length;
+  document.getElementById('asig-kpis').innerHTML=
+    '<div class="ak-c"><div class="ak-l">Asignado hoy</div><div class="ak-v">'+fmt(total)+'</div><div class="ak-s">'+src.length+' pedidos</div></div>'+
+    '<div class="ak-c"><div class="ak-l">Local</div><div class="ak-v">'+fmt(local)+'</div><div class="ak-s">'+src.filter(function(r){return r[8]==='LOCAL'}).length+' pedidos</div></div>'+
+    '<div class="ak-c"><div class="ak-l">Expo</div><div class="ak-v">'+fmt(expo)+'</div><div class="ak-s">'+src.filter(function(r){return r[8]==='EXPO'}).length+' pedidos</div></div>'+
+    '<div class="ak-c"><div class="ak-l">Cumplen pedido</div><div class="ak-v">'+cumpl+'</div><div class="ak-s">'+parcial+' parciales</div></div>';
+}
+function showPage(name,el){
+  CP=name;
+  var pages=document.querySelectorAll('.page');
+  for(var i=0;i<pages.length;i++) pages[i].classList.remove('active');
+  var tabs=document.querySelectorAll('.tab');
+  for(var i=0;i<tabs.length;i++) tabs[i].classList.remove('active');
+  document.getElementById('page-'+name).classList.add('active');
+  if(el&&el.classList) el.classList.add('active');
+  if(name==='asig'){buildAsigKPIs();renderAsig();}
+  else if(name!=='resumen') renderT(name);
+}
+function refreshAll(){
+  updSB();buildResumen();
+  if(CP!=='resumen'&&CP!=='asig') renderT(CP);
+  if(CP==='asig'){buildAsigKPIs();renderAsig();}
+}
+function loadFiles(inp){
+  var files=Array.from(inp.files);
+  if(!files.length) return;
+  var pending=files.length;
+  var loaded=[];
+  function done(name){
+    loaded.push(name);
+    if(loaded.length===pending){
+      var msg='\u2713 '+loaded.join(' + ')+' cargados';
+      document.getElementById('upload-status').textContent=msg;
+      document.getElementById('up-msg-side').textContent=msg;
+      refreshAll();
+    }
+  }
+  files.forEach(function(file){
+    var isCSV=file.name.toLowerCase().endsWith('.csv');
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        if(isCSV){
+          processAsig(e.target.result);
+        } else {
+          var wb=XLSX.read(e.target.result,{type:'binary',cellDates:true});
+          var ws=wb.Sheets[wb.SheetNames[0]];
+          var json=XLSX.utils.sheet_to_json(ws,{defval:''});
+          // Auto-detect: if it has PedidoDeVentaItemAsignado it's asig CSV, else deuda
+          if(json.length && json[0]['PedidoDeVentaItemAsignado']!==undefined){
+            processAsigXLS(json);
+          } else {
+            processDeuda(json);
+          }
+        }
+        done(file.name);
+      }catch(err){
+        document.getElementById('upload-status').textContent='\u2717 Error en '+file.name;
+        console.error(err);
+        done(file.name);
+      }
+    };
+    if(isCSV) reader.readAsText(file,'latin1'); else reader.readAsBinaryString(file);
+  });
+}
+
+function processAsig(text){
+  // Parse CSV - try semicolon then comma
+  var lines=text.split('\n').filter(function(l){return l.trim()});
+  if(!lines.length) return;
+  var sep=lines[0].indexOf(';')>=0?';':',';
+  var headers=lines[0].split(sep).map(function(h){return h.trim().replace(/"/g,'')});
+  var rows=lines.slice(1).filter(function(l){return l.trim()}).map(function(l){
+    var vals=l.split(sep).map(function(v){return v.trim().replace(/"/g,'')});
+    var obj={};
+    headers.forEach(function(h,i){obj[h]=vals[i]||''});
+    return obj;
+  });
+  buildAsigRows(rows);
+}
+
+function processAsigXLS(json){
+  buildAsigRows(json);
+}
+
+function buildAsigRows(rows){
+  // Group by pedido+item, sum quantities
+  var map={};
+  rows.forEach(function(r){
+    var key=String(r['PedidoDeVentaItemAsignado']||'').trim();
+    if(!key) return;
+    var parts=key.split('/');
+    var ped=parseInt(parts[0])||0;
+    var item=parseInt(parts[1])||0;
+    // Match with current RAW to get marca, cliente, usd, estado
+    var match=null;
+    for(var i=0;i<RAW.length;i++){
+      if(RAW[i][0]===ped&&RAW[i][1]===item){match=RAW[i];break;}
+    }
+    var fh=String(r['FechaHora']||'');
+    var hora=fh.length>=16?fh.substring(11,16):'';
+    var usuario=String(r['Usuario']||'');
+    // Fix encoding
+    try{usuario=decodeURIComponent(escape(usuario))}catch(e){}
+    var cant=parseFloat(r['Cantidad'])||0;
+    if(!map[key]){
+      map[key]={
+        pedido:key, ped:ped, item:item,
+        marca:match?match[2]:(r['Marca']||'—'),
+        cliente:match?match[3]:'—',
+        cantTotal:0,
+        usd:match?match[6]:0,
+        estado:match?match[5]:(r['Estado']||'—'),
+        cantPedida:match?match[10]:0,  // index 10 is cant asignada... 
+        hora:hora, usuario:usuario,
+        merc:match?match[11]:'LOCAL'
+      };
+    }
+    map[key].cantTotal+=cant;
+    if(hora && hora < map[key].hora || !map[key].hora) map[key].hora=hora;
+  });
+
+  // Also need cant pedida - look it up from original full data if possible
+  var asigRows=[];
+  Object.keys(map).forEach(function(key){
+    var m=map[key];
+    // Determine CUMPLE vs PARCIAL
+    // CUMPLIDO state = cumple; else check if cant asignada >= cant pedida
+    var tipo='PARCIAL';
+    if(m.estado==='CUMPLIDO') tipo='CUMPLE';
+    asigRows.push([
+      m.pedido, m.marca, m.cliente,
+      Math.round(m.cantTotal), m.usd,
+      m.estado, m.hora, m.usuario, m.merc, tipo,
+      m.cat, m.orig, m.asigPrevia
+    ]);
+  });
+
+  ASIG=asigRows;
+}
+function processDeuda(json){
+  var rows=[];
+  var today=new Date('2026-06-05');
+  for(var i=0;i<json.length;i++){
+    var r=json[i];
+    var estado=String(r['Estado \u00cdtem']||r['Estado']||'').trim();
+    if(!estado) continue;
+    var skip=false;
+    for(var j=0;j<EXCLE.length;j++) if(EXCLE[j]===estado){skip=true;break;}
+    if(skip) continue;
+    var active=false;
+    for(var j=0;j<ACTE.length;j++) if(ACTE[j]===estado){active=true;break;}
+    if(!active) continue;
+    var codArt=String(r['Cod. Art\u00edculo']||'');
+    var prefijo=codArt.split('-')[0];
+    var cat='MODA';
+    for(var j=0;j<ID_C.length;j++) if(codArt.indexOf(ID_C[j])===0){cat='ID';break;}
+    if(cat==='MODA'&&FAM[prefijo]) cat=FAM[prefijo];
+    if(cat==='EXCLUIR') continue;
+    var origRaw=String(r['Origen de fabricaci\u00f3n']||r['Origen de fabricacion']||'').trim().toUpperCase();
+    var orig=origRaw==='APHOLOS ASIA'?'ASIA':origRaw==='APHOLOS BEIRO'?'BEIRO':'';
+    var tipoCod=String(r['Cod. Tipo Pedido']||'').trim();
+    var exclTipo=false;
+    for(var j=0;j<EXCLT.length;j++) if(EXCLT[j]===tipoCod){exclTipo=true;break;}
+    if(exclTipo) continue;
+    var isExpo=false;
+    for(var j=0;j<EXPO.length;j++) if(EXPO[j]===tipoCod){isExpo=true;break;}
+    var merc=isExpo?'EXPO':'LOCAL';
+    var ped=parseInt(r['N\u00fam. Pedido'])||0;
+    var item=parseInt(r['\u00cdtem']||r['\u00cdtem Ped.']||0);
+    var fecha=r['Fe. Target Ventas']||'';
+    if(fecha instanceof Date) fecha=fecha.toISOString().split('T')[0];
+    else if(typeof fecha==='number'){var d2=new Date(Math.round((fecha-25569)*86400*1000));fecha=d2.toISOString().split('T')[0];}
+    else fecha=String(fecha).split('T')[0];
+    var dias=fecha?Math.round((today-new Date(fecha))/86400000):0;
+    var usd=parseFloat(r['Imp. \u00cdtem Dolares']||r['Imp. Item Dolares']||0);
+    var asig=parseInt(r['Cant. Asignada']||0);
+    rows.push([ped,item,String(r['Marca']||''),String(r['Raz\u00f3n Social']||''),fecha,estado,usd,dias,cat,orig,asig,merc]);
+  }
+  RAW=rows;
+  refreshAll();
+}
+refreshAll();
+</script>
+</body>
+</html>
