@@ -182,7 +182,7 @@ td.w{white-space:normal;max-width:170px;font-size:.71rem}td.m{font-family:var(--
       <div class="res-splits" id="res-splits"></div>
       <div class="res-panels">
         <div class="panel"><div class="ph">Urgencia por fecha target</div><div class="pb" id="urgencia-rows"></div></div>
-        <div class="panel"><div class="ph">Top 10 marcas</div><div class="pb" id="top-marcas"></div></div>
+        <div class="panel"><div class="ph">Top 20 marcas</div><div class="pb" id="top-marcas"></div></div>
       </div>
     </div>
 
@@ -363,7 +363,7 @@ function buildResumen(){
   var total=src.reduce(function(s,r){return s+r[6]},0);
   var gestFab=GESTION.filter(function(r){return r[10]==='FAB'}).reduce(function(s,r){return s+r[6]},0);
   var totalNeto=total-gestFab;
-  var exp=src.filter(function(r){return r[10]>0}).reduce(function(s,r){return s+r[6]},0);
+  var exp=src.filter(function(r){return r[10]>0}).reduce(function(s,r){var u=r[12]>0?r[6]*r[10]/r[12]:r[6];return s+u},0);
   var pend=src.filter(function(r){return r[10]===0}).reduce(function(s,r){return s+r[6]},0);
   var venc=src.filter(function(r){return r[7]>0}).reduce(function(s,r){return s+r[6]},0);
   var d30=src.filter(function(r){return r[7]<=0&&r[7]>=-30}).reduce(function(s,r){return s+r[6]},0);
@@ -418,10 +418,23 @@ function buildResumen(){
 
   var mm={};
   src.forEach(function(r){var k=r[2]||'-';if(!mm[k])mm[k]={u:0,c:r[8]};mm[k].u+=r[6];});
-  var sm2=Object.keys(mm).map(function(k){return [k,mm[k]]}).sort(function(a,b){return b[1].u-a[1].u}).slice(0,10);
+  var sm2=Object.keys(mm).map(function(k){return [k,mm[k]]}).sort(function(a,b){return b[1].u-a[1].u}).slice(0,20);
   var mc=sm2.length?sm2[0][1].u:1;
+  var grandTotal=src.reduce(function(s,r){return s+r[6]},0);
+  var cumUSD=0;
   document.getElementById('top-marcas').innerHTML=sm2.map(function(kv,i){
-    return '<div class="cr"><div class="ck">'+(i+1)+'</div><div class="cn">'+kv[0]+'</div><div style="flex-shrink:0;margin:0 .4rem">'+catB(kv[1].c)+'</div><div class="cbw"><div class="cb" style="width:'+Math.round(kv[1].u/mc*100)+'%"></div></div><div class="cu">'+fmt(kv[1].u)+'</div></div>';
+    cumUSD+=kv[1].u;
+    var pct=grandTotal>0?Math.round(kv[1].u/grandTotal*100):0;
+    var cumPct=grandTotal>0?Math.round(cumUSD/grandTotal*100):0;
+    return '<div class="cr">'+
+      '<div class="ck">'+(i+1)+'</div>'+
+      '<div class="cn">'+kv[0]+'</div>'+
+      '<div style="flex-shrink:0;margin:0 .4rem">'+catB(kv[1].c)+'</div>'+
+      '<div class="cbw"><div class="cb" style="width:'+Math.round(kv[1].u/mc*100)+'%"></div></div>'+
+      '<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);min-width:38px;text-align:right">'+pct+'%</div>'+
+      '<div style="font-family:var(--mono);font-size:.65rem;color:var(--blue);min-width:42px;text-align:right">'+cumPct+'%</div>'+
+      '<div class="cu">'+fmt(kv[1].u)+'</div>'+
+    '</div>';
   }).join('');
 }
 
