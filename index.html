@@ -368,7 +368,7 @@ function setF(type,val,el){
   var btns=el.closest('.sb-section').querySelectorAll('.sb-opt');
   for(var i=0;i<btns.length;i++) btns[i].classList.remove('active');
   el.classList.add('active');
-  updateTabLabels(); }
+  updateTabLabels(); refreshAll();}
 
 function exportXLS(view){
   var headers, dataRows, fname;
