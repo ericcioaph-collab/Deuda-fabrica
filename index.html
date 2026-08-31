@@ -395,45 +395,47 @@ function exportXLS(view){
              gestion:'Gestion_comercial',expedi:'En_expedicion',asig:'Asignados_hoy',saldos:'Saldos_pendientes'};
   fname=(names[view]||view)+'_apholos.csv';
 
+  function apb(r){return r[3]&&r[3].indexOf('APB')===0?' ***':'';}
+  function stdRows(data){
+    return data.map(function(r){
+      return [r[0]+'-'+r[1], r[2]+apb(r), r[14]||'', r[4], r[7],
+              r[12], r[10], r[13], r[6]];
+    });
+  }
+  var stdH=['Pedido','Marca','Cod. Producto','Target','Dias','C.Pedida','C.Asig.','C.Pend.','USD'];
+
   if(view==='todos'){
     var q=document.getElementById('s-todos').value.toLowerCase();
     var est=document.getElementById('fe-todos').value;
     var urgf=document.getElementById('fu-todos').value;
     var data=applyGF(RAW).filter(function(r){
-      if(q&&String(r[0]).indexOf(q)<0&&r[2].toLowerCase().indexOf(q)<0&&r[3].toLowerCase().indexOf(q)<0) return false;
+      if(q&&String(r[0]).indexOf(q)<0&&r[2].toLowerCase().indexOf(q)<0) return false;
       if(est&&r[5].indexOf(est)<0) return false;
       if(urgf&&urg(r[7])!==urgf) return false;
       return true;
     });
-    headers=['Pedido','Marca','Cliente','Target','Dias','Cat.','Origen','Mercado','Cant. Pedida','Cant. Asig.','Cant. Pend.','USD'];
-    dataRows=data.map(function(r){return [r[0]+'-'+r[1],r[2],r[3],r[4],r[7],r[8],r[9],r[11],r[12],r[10],r[13],r[6]];});
+    headers=stdH; dataRows=stdRows(data);
   } else if(view==='vencidos'){
-    var data=applyGF(RAW).filter(function(r){return r[7]>0});
-    headers=['Pedido','Marca','Cliente','Target','Atraso (dias)','Cat.','Origen','Mercado','Cant. Pedida','Cant. Asig.','Cant. Pend.','USD'];
-    dataRows=data.map(function(r){return [r[0]+'-'+r[1],r[2],r[3],r[4],r[7],r[8],r[9],r[11],r[12],r[10],r[13],r[6]];});
+    var data=applyGFActive(RAW_ACTIVE).filter(function(r){return r[7]>0});
+    headers=stdH; dataRows=stdRows(data);
   } else if(view==='proximos'){
-    var data=applyGF(RAW).filter(function(r){return r[7]<=0&&r[7]>=-30});
-    headers=['Pedido','Marca','Cliente','Target','Dias','Cat.','Origen','Mercado','Cant. Pedida','Cant. Asig.','Cant. Pend.','USD'];
-    dataRows=data.map(function(r){return [r[0]+'-'+r[1],r[2],r[3],r[4],r[7],r[8],r[9],r[11],r[12],r[10],r[13],r[6]];});
+    var data=applyGFActive(RAW_ACTIVE).filter(function(r){return r[7]<=0&&r[7]>=-30});
+    headers=stdH; dataRows=stdRows(data);
+  } else if(view==='expedi'){
+    var data=applyGFActive(RAW_ACTIVE).filter(function(r){return r[10]>0});
+    headers=stdH; dataRows=stdRows(data);
   } else if(view==='gestion'){
-    headers=['Pedido','Marca','Cliente','Cat.','Origen','Mercado','Cant. Pedida','Cant. Pend.','Estado','USD','Fuente'];
-    dataRows=GESTION.map(function(r){return [r[0],r[1],r[2],r[3],r[4],r[5],r[7],r[8],r[9],r[6],r[10]];});
+    headers=['Pedido','Marca','Cat.','Origen','Mercado','C.Pedida','C.Pend.','Estado','USD','Fuente'];
+    dataRows=GESTION.map(function(r){return [r[0],r[1],r[3],r[4],r[5],r[7],r[8],r[9],r[6],r[10]];});
   } else if(view==='asig'){
-    headers=['Pedido','Marca','Cliente','Cant. Pedida','Asig. hoy','Asig. previa','Mercado','USD hoy'];
+    headers=['Pedido','Marca','C.Pedida','Asig.hoy','Asig.previa','Mercado','USD hoy'];
     dataRows=ASIG.map(function(r){
       var usdHoy=r[13]>0?Math.round(r[4]*r[3]/r[13]*100)/100:r[4];
-      return [r[0],r[1],r[2],r[13],r[3],r[12],r[8],usdHoy];
-    });
-  } else if(view==='expedi'){
-    var data=applyGF(RAW).filter(function(r){return r[10]>0});
-    headers=['Pedido','Marca','Cliente','Target','Dias','Cat.','Origen','Mercado','Cant. Pedida','Cant. Asig.','Cant. Pend.','USD Asig.'];
-    dataRows=data.map(function(r){
-      var usdAsig=r[12]>0?Math.round(r[6]*r[10]/r[12]*100)/100:r[6];
-      return [r[0]+'-'+r[1],r[2],r[3],r[4],r[7],r[8],r[9],r[11],r[12],r[10],r[13],usdAsig];
+      return [r[0],r[1],r[13],r[3],r[12],r[8],usdHoy];
     });
   } else if(view==='saldos'){
-    headers=['Pedido','Marca','Cliente','Cant. Pedida','Cant. Asig.','Cant. Pend.','USD Pend.'];
-    dataRows=SALDOS.map(function(r){return [r[0]+'-'+r[1],r[2],r[3],r[5],r[6],r[7],r[8]];});
+    headers=['Pedido','Marca','C.Pedida','C.Asig.','C.Pend.','USD Pend.'];
+    dataRows=SALDOS.map(function(r){return [r[0]+'-'+r[1],r[2],r[5],r[6],r[7],r[8]];});
   } else { return; }
 
   var lines=[headers.join(';')];
